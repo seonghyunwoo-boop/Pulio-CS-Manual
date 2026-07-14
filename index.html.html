@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pulio CS MANUAL</title>
+    <!-- 구글 웹폰트 (Noto Sans KR) 및 Font Awesome 아이콘 링크 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -54,9 +55,9 @@
         .hero-banner {
             position: relative;
             height: 420px;
-            /* 실제 서비스 운영 시에는 아래 url('') 안에 배경 이미지 경로를 넣어주세요 */
-            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.4)), 
-                        url('https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            /* 따뜻하고 포근한 거실 분위기의 홈 인테리어 이미지 적용 */
+            background: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.45)), 
+                        url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -254,6 +255,7 @@
 </head>
 <body>
 
+    <!-- 상단 퀵 네비게이션 -->
     <header class="top-nav">
         <a href="#"><i class="fa-regular fa-bell"></i> 공지사항</a>
         <a href="#"><i class="fa-solid fa-arrows-rotate"></i> 업데이트</a>
@@ -261,6 +263,7 @@
         <a href="#"><i class="fa-solid fa-magnifying-glass"></i> 검색</a>
     </header>
 
+    <!-- 메인 비주얼 배너 영역 -->
     <section class="hero-banner">
         <h1>Pulio CS MANUAL</h1>
         <p>고객의 하루를 더 편안하게, 폴리오 CS 매뉴얼</p>
@@ -270,9 +273,11 @@
         </div>
     </section>
 
+    <!-- 메인 본문 영역 -->
     <main class="container">
         <div class="faq-list">
             
+            <!-- 1. 주문 취소 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-cancel">
@@ -292,6 +297,7 @@
                 </div>
             </div>
 
+            <!-- 2. 교환 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-exchange">
@@ -311,6 +317,7 @@
                 </div>
             </div>
 
+            <!-- 3. 반품 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-refund">
@@ -330,6 +337,7 @@
                 </div>
             </div>
 
+            <!-- 4. 유상 비용 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-price">
@@ -349,6 +357,7 @@
                 </div>
             </div>
 
+            <!-- 5. 제품 설명 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-product">
@@ -368,6 +377,7 @@
                 </div>
             </div>
 
+            <!-- 6. 접수 기재 방법 -->
             <div class="faq-item">
                 <div class="faq-header" onclick="toggleAccordion(this)">
                     <div class="icon-box icon-write">
@@ -389,6 +399,7 @@
 
         </div>
 
+        <!-- 하단 안내사항 정보 박스 -->
         <div class="info-notice">
             <i class="fa-regular fa-lightbulb"></i>
             <div class="info-notice-content">
@@ -398,13 +409,14 @@
         </div>
     </main>
 
+    <!-- 아코디언 동작을 위한 간단한 자바스크립트 -->
     <script>
         function toggleAccordion(element) {
             const item = element.parentElement;
             const content = item.querySelector('.faq-content');
             const isActive = item.classList.contains('active');
 
-            // 다른 열려있는 아코디언 닫기 (다중 열기를 원할 경우 이 블록 전체를 지우시면 됩니다)
+            // 다른 열려있는 아코디언 닫기
             document.querySelectorAll('.faq-item').forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('active');
