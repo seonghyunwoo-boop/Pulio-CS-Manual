@@ -105,32 +105,6 @@
             font-size: 16px;
         }
 
-        /* ----- 상단 탭 메뉴 ----- */
-        .tab-menu {
-            display: flex;
-            justify-content: space-between;
-            background-color: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0 10%;
-        }
-
-        .tab-item {
-            flex: 1;
-            text-align: center;
-            padding: 18px 0;
-            font-size: 15px;
-            font-weight: 700;
-            color: #555;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab-item.active, .tab-item:hover {
-            color: #5c3bc4;
-            border-bottom: 3px solid #5c3bc4;
-        }
-
         /* ----- 메인 콘텐츠 컨테이너 ----- */
         .container {
             max-width: 900px;
@@ -274,8 +248,6 @@
             }
             .hero-banner h1 { font-size: 32px; }
             .hero-banner p { font-size: 14px; }
-            .tab-menu { padding: 0 2%; }
-            .tab-item { font-size: 13px; padding: 15px 0; }
             .faq-inner-text { padding: 20px; }
         }
     </style>
@@ -297,15 +269,6 @@
             <input type="text" placeholder="검색어를 입력해주세요.">
         </div>
     </section>
-
-    <nav class="tab-menu">
-        <div class="tab-item active">주문 취소</div>
-        <div class="tab-item">교환</div>
-        <div class="tab-item">반품</div>
-        <div class="tab-item">유상 비용</div>
-        <div class="tab-item">제품 설명</div>
-        <div class="tab-item">접수 기재 방법</div>
-    </nav>
 
     <main class="container">
         <div class="faq-list">
@@ -441,7 +404,7 @@
             const content = item.querySelector('.faq-content');
             const isActive = item.classList.contains('active');
 
-            // 다른 열려있는 아코디언 닫기 (원치 않을 경우 이 루프 구간을 지우시면 다중 열기가 가능합니다)
+            // 다른 열려있는 아코디언 닫기 (다중 열기를 원할 경우 이 블록 전체를 지우시면 됩니다)
             document.querySelectorAll('.faq-item').forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('active');
@@ -449,7 +412,7 @@
                 }
             });
 
-            // 현재 누른 아코디언 여닫기 토글
+            // 현재 누른 아코디언 토글
             if (isActive) {
                 item.classList.remove('active');
                 content.style.maxHeight = null;
