@@ -3,28 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pulio CS MANUAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Pulio CS MANUAL - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* 기본 리셋 및 폰트 설정 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-
-        body {
-            background-color: #f8f9fc;
-            color: #333;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
+        /* 기본 레이아웃 리셋 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+        body { background-color: #f8f9fc; color: #333; }
+        a { text-decoration: none; color: inherit; display: block; } /* 카드 전체를 클릭 가능하게 */
 
         /* ----- 상단 네비게이션 헤더 ----- */
         .top-nav {
@@ -42,21 +29,12 @@
             z-index: 10;
         }
 
-        .top-nav a {
-            transition: color 0.2s;
-        }
-
-        .top-nav a:hover {
-            color: #5c3bc4;
-        }
-
-        /* ----- 메인 히어로 배너 영역 ----- */
+        /* ----- 메인 히어로 배너 영역 (따뜻한 거실 배경 + 글씨 가독성 패치) ----- */
         .hero-banner {
             position: relative;
             height: 420px;
-            /* 실제 서비스 운영 시에는 아래 url('') 안에 배경 이미지 경로를 넣어주세요 */
-            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.4)), 
-                        url('https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -67,16 +45,18 @@
 
         .hero-banner h1 {
             font-size: 45px;
-            font-weight: 700;
-            color: #431fa1; /* 폴리오 메인 퍼플 톤 */
+            font-weight: 800;
+            color: #ffffff;
             margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); 
         }
 
         .hero-banner p {
             font-size: 16px;
-            color: #444;
-            font-weight: 500;
+            color: #ffffff;
+            font-weight: 700;
             margin-bottom: 30px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
         }
 
         /* 검색창 */
@@ -105,66 +85,29 @@
             font-size: 16px;
         }
 
-        /* ----- 상단 탭 메뉴 ----- */
-        .tab-menu {
-            display: flex;
-            justify-content: space-between;
-            background-color: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0 10%;
-        }
+        /* ----- 메뉴 리스트 영역 ----- */
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .menu-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; }
 
-        .tab-item {
-            flex: 1;
-            text-align: center;
-            padding: 18px 0;
-            font-size: 15px;
-            font-weight: 700;
-            color: #555;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab-item.active, .tab-item:hover {
-            color: #5c3bc4;
-            border-bottom: 3px solid #5c3bc4;
-        }
-
-        /* ----- 메인 콘텐츠 컨테이너 ----- */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        /* 아코디언 메뉴 리스트 */
-        .faq-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-
-        /* 아코디언 아이템 스타일링 */
-        .faq-item {
+        /* 각각의 카드 스타일 (마우스 올리면 부드럽게 반응) */
+        .menu-item {
             background-color: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
             border: 1px solid #edf2f7;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
-        .faq-header {
-            display: flex;
-            align-items: center;
-            padding: 22px 25px;
-            cursor: pointer;
-            user-select: none;
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(92, 59, 196, 0.1);
+            border-color: #5c3bc4;
         }
 
-        /* 카테고리별 원형 아이콘 공통 */
+        .menu-header { display: flex; align-items: center; padding: 22px 25px; }
+
+        /* 카테고리별 원형 아이콘 */
         .icon-box {
             width: 48px;
             height: 48px;
@@ -178,105 +121,39 @@
             flex-shrink: 0;
         }
 
-        /* 기획서 시안 색상 매칭 */
-        .icon-cancel { background-color: #7b57df; }  /* 주문 취소 (퍼플) */
-        .icon-exchange { background-color: #4b89dc; }/* 교환 (블루) */
-        .icon-refund { background-color: #ff6f61; }  /* 반품 (코랄레드) */
-        .icon-price { background-color: #ffbf00; }   /* 유상 비용 (옐로우) */
-        .icon-product { background-color: #4bd0b1; } /* 제품 설명 (민트) */
-        .icon-write { background-color: #ff6097; }   /* 접수 기재 방법 (핑크) */
+        .icon-cancel { background-color: #7b57df; }
+        .icon-exchange { background-color: #4b89dc; }
+        .icon-refund { background-color: #ff6f61; }
+        .icon-price { background-color: #ffbf00; }
+        .icon-product { background-color: #4bd0b1; }
+        .icon-write { background-color: #ff6097; }
 
-        .text-box {
-            flex-grow: 1;
-        }
+        .text-box { flex-grow: 1; }
+        .menu-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
 
-        .faq-title {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+        /* 각 카테고리별 글자 포인트 색상 */
+        .menu-item:nth-child(1) .menu-title { color: #7b57df; }
+        .menu-item:nth-child(2) .menu-title { color: #4b89dc; }
+        .menu-item:nth-child(3) .menu-title { color: #ff6f61; }
+        .menu-item:nth-child(4) .menu-title { color: #ffbf00; }
+        .menu-item:nth-child(5) .menu-title { color: #4bd0b1; }
+        .menu-item:nth-child(6) .menu-title { color: #ff6097; }
 
-        /* 각 카테고리별 타이틀 글자 색상 매칭 */
-        .faq-item:nth-child(1) .faq-title { color: #7b57df; }
-        .faq-item:nth-child(2) .faq-title { color: #4b89dc; }
-        .faq-item:nth-child(3) .faq-title { color: #ff6f61; }
-        .faq-item:nth-child(4) .faq-title { color: #ffbf00; }
-        .faq-item:nth-child(5) .faq-title { color: #4bd0b1; }
-        .faq-item:nth-child(6) .faq-title { color: #ff6097; }
+        .menu-desc { font-size: 13.5px; color: #777; }
+        .arrow-icon { font-size: 16px; color: #ccc; transition: color 0.2s; }
+        .menu-item:hover .arrow-icon { color: #5c3bc4; }
 
-        .faq-desc {
-            font-size: 13.5px;
-            color: #777;
-        }
+        /* 하단 안내 공지 */
+        .info-notice { display: flex; align-items: flex-start; background-color: #f3f0ff; border-radius: 12px; padding: 20px 25px; }
+        .info-notice i { font-size: 20px; color: #7b57df; margin-right: 15px; margin-top: 2px; }
+        .info-notice-content h4 { font-size: 14px; font-weight: 700; color: #431fa1; margin-bottom: 4px; }
+        .info-notice-content p { font-size: 12.5px; color: #666; line-height: 1.5; }
 
-        .arrow-icon {
-            font-size: 16px;
-            color: #aaa;
-            transition: transform 0.3s ease;
-        }
-
-        /* 아코디언 본문 내용 영역 */
-        .faq-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background-color: #fafbfc;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .faq-inner-text {
-            padding: 25px 25px 25px 93px; /* 아이콘 넓이 확보를 위해 왼쪽 여백 추가 */
-            font-size: 14px;
-            line-height: 1.6;
-            color: #555;
-        }
-
-        /* 클릭 활성화 시 스타일 */
-        .faq-item.active .arrow-icon {
-            transform: rotate(180deg);
-        }
-
-        /* ----- 하단 안내사항 알림 ----- */
-        .info-notice {
-            display: flex;
-            align-items: flex-start;
-            background-color: #f3f0ff;
-            border-radius: 12px;
-            padding: 20px 25px;
-            margin-top: 10px;
-        }
-
-        .info-notice i {
-            font-size: 20px;
-            color: #7b57df;
-            margin-right: 15px;
-            margin-top: 2px;
-        }
-
-        .info-notice-content h4 {
-            font-size: 14px;
-            font-weight: 700;
-            color: #431fa1;
-            margin-bottom: 4px;
-        }
-
-        .info-notice-content p {
-            font-size: 12.5px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        /* ----- 모바일 반응형 처리 ----- */
+        /* 모바일 반응형 대응 */
         @media (max-width: 768px) {
-            .hero-banner {
-                padding-left: 5%;
-                height: 350px;
-            }
+            .hero-banner { padding-left: 5%; height: 350px; }
             .hero-banner h1 { font-size: 32px; }
             .hero-banner p { font-size: 14px; }
-            .tab-menu { padding: 0 2%; }
-            .tab-item { font-size: 13px; padding: 15px 0; }
-            .faq-inner-text { padding: 20px; }
         }
     </style>
 </head>
@@ -286,7 +163,6 @@
         <a href="#"><i class="fa-regular fa-bell"></i> 공지사항</a>
         <a href="#"><i class="fa-solid fa-arrows-rotate"></i> 업데이트</a>
         <a href="#"><i class="fa-regular fa-star"></i> 즐겨찾기</a>
-        <a href="#"><i class="fa-solid fa-magnifying-glass"></i> 검색</a>
     </header>
 
     <section class="hero-banner">
@@ -298,166 +174,65 @@
         </div>
     </section>
 
-    <nav class="tab-menu">
-        <div class="tab-item active">주문 취소</div>
-        <div class="tab-item">교환</div>
-        <div class="tab-item">반품</div>
-        <div class="tab-item">유상 비용</div>
-        <div class="tab-item">제품 설명</div>
-        <div class="tab-item">접수 기재 방법</div>
-    </nav>
-
     <main class="container">
-        <div class="faq-list">
+        <div class="menu-list">
             
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
+            <a href="cancel.html" class="menu-item">
+                <div class="menu-header">
                     <div class="icon-box icon-cancel">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
                     <div class="text-box">
-                        <div class="faq-title">주문 취소</div>
-                        <div class="faq-desc">주문 취소 가능 여부와 단계별 처리 방법을 안내합니다.</div>
+                        <div class="menu-title">주문 취소</div>
+                        <div class="menu-desc">주문 취소 가능 여부와 단계별 처리 방법을 안내합니다.</div>
                     </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • <strong>배송 준비 전:</strong> 고객센터 혹은 마이페이지를 통해 즉시 취소가 가능합니다.<br>
-                        • <strong>배송 중 / 상품 발송 후:</strong> 발송된 이후에는 즉시 취소가 불가하며, 상품 수령 후 반품 절차로 접수해 주셔야 합니다. (반품 배송비가 부과될 수 있습니다.)
-                    </div>
-                </div>
-            </div>
+            </a>
 
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
+            <a href="exchange.html" class="menu-item">
+                <div class="menu-header">
                     <div class="icon-box icon-exchange">
                         <i class="fa-solid fa-arrows-rotate"></i>
                     </div>
                     <div class="text-box">
-                        <div class="faq-title">교환</div>
-                        <div class="faq-desc">교환 접수부터 처리, 재배송까지 모든 과정을 안내합니다.</div>
+                        <div class="menu-title">교환</div>
+                        <div class="menu-desc">교환 접수부터 처리, 재배송까지 모든 과정을 안내합니다.</div>
                     </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • 상품 수령 후 7일 이내에 교환 신청이 가능합니다.<br>
-                        • 제품 불량 및 오배송의 경우 왕복 배송비는 본사에서 부담하며, 고객 변심에 의한 색상/옵션 교환 시 왕복 배송비가 청구됩니다.
-                    </div>
-                </div>
-            </div>
+            </a>
 
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
+            <a href="refund.html" class="menu-item">
+                <div class="menu-header">
                     <div class="icon-box icon-refund">
                         <i class="fa-solid fa-reply"></i>
                     </div>
                     <div class="text-box">
-                        <div class="faq-title">반품</div>
-                        <div class="faq-desc">반품 접수부터 회수, 환불 처리까지 모두 안내합니다.</div>
+                        <div class="menu-title">반품</div>
+                        <div class="menu-desc">반품 접수부터 회수, 환불 처리까지 모두 안내합니다.</div>
                     </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • 반품은 상품 수령 후 7일 이내에 미개봉 상태에서만 가능합니다.<br>
-                        • 포장이 훼손되어 상품 가치가 상실된 경우 반품이 제한될 수 있습니다. 회수 완료 후 검수를 거쳐 3영업일 이내 환불됩니다.
-                    </div>
-                </div>
-            </div>
+            </a>
 
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
+            <a href="price.html" class="menu-item">
+                <div class="menu-header">
                     <div class="icon-box icon-price">
                         <i class="fa-solid fa-won-sign"></i>
                     </div>
                     <div class="text-box">
-                        <div class="faq-title">유상 비용</div>
-                        <div class="faq-desc">유상 A/S 기준과 비용, 입금 방법을 안내합니다.</div>
+                        <div class="menu-title">유상 비용</div>
+                        <div class="menu-desc">유상 A/S 기준과 비용, 입금 방법을 안내합니다.</div>
                     </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • 무상 보증 기간(구매 후 1년)이 경과하였거나, 고객 과실로 인한 파손의 경우 유상 서비스로 전환됩니다.<br>
-                        • 수리비 및 부품 비용은 모델별 기준에 따라 산정되며 고객 안내 후 입금이 완료되면 수리가 시작됩니다.
-                    </div>
-                </div>
-            </div>
+            </a>
 
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
+            <a href="product.html" class="menu-item">
+                <div class="menu-header">
                     <div class="icon-box icon-product">
                         <i class="fa-solid fa-box-open"></i>
                     </div>
                     <div class="text-box">
-                        <div class="faq-title">제품 설명</div>
-                        <div class="faq-desc">폴리오의 모든 제품 정보와 사용 방법을 확인하세요.</div>
-                    </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
-                </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • 각 제품의 상세 스펙, 충전 방법, 올바른 보관 및 세척 가이드를 제공합니다.<br>
-                        • 처음 사용 시 배터리를 완충하여 사용해 주시고, 권장 사용 시간(1회 15분)을 준수해 주세요.
-                    </div>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-header" onclick="toggleAccordion(this)">
-                    <div class="icon-box icon-write">
-                        <i class="fa-solid fa-pen"></i>
-                    </div>
-                    <div class="text-box">
-                        <div class="faq-title">접수 기재 방법</div>
-                        <div class="faq-desc">정확한 접수를 위한 필수 기재 항목과 작성 예시를 안내합니다.</div>
-                    </div>
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
-                </div>
-                <div class="faq-content">
-                    <div class="faq-inner-text">
-                        • <strong>필수 기재 정보:</strong> 구매자명, 연락처, 구매처(공홈/네이버 등), 주문번호, 증상 내용<br>
-                        • 증상을 확인할 수 있는 짧은 영상이나 사진을 첨부해 주시면 더욱 신속한 처리가 가능합니다.
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="info-notice">
-            <i class="fa-regular fa-lightbulb"></i>
-            <div class="info-notice-content">
-                <h4>안내 사항</h4>
-                <p>CS 매뉴얼은 지속적으로 업데이트됩니다. 변경 사항은 공지사항에서 확인해 주세요.</p>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        function toggleAccordion(element) {
-            const item = element.parentElement;
-            const content = item.querySelector('.faq-content');
-            const isActive = item.classList.contains('active');
-
-            // 다른 열려있는 아코디언 닫기 (원치 않을 경우 이 루프 구간을 지우시면 다중 열기가 가능합니다)
-            document.querySelectorAll('.faq-item').forEach(otherItem => {
-                if (otherItem !== item) {
-                    otherItem.classList.remove('active');
-                    otherItem.querySelector('.faq-content').style.maxHeight = null;
-                }
-            });
-
-            // 현재 누른 아코디언 여닫기 토글
-            if (isActive) {
-                item.classList.remove('active');
-                content.style.maxHeight = null;
-            } else {
-                item.classList.add('active');
-                content.style.maxHeight = content.scrollHeight + "px";
-            }
-        }
-    </script>
-</body>
-</html>
+                        <div class="menu-title
