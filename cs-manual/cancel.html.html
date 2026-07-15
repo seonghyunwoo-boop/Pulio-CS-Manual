@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 취소 - Pulio CS MANUAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+        body { background-color: #f8f9fc; color: #333; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ----- 상단 네비게이션 헤더 (동일 유지) ----- */
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px 10%;
+            background-color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            color: #666;
+            gap: 20px;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* ----- 메인 히어로 배너 영역 (동일 배경 유지) ----- */
+        .hero-banner {
+            position: relative;
+            height: 420px;
+            background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 10%;
+            padding-top: 60px;
+        }
+
+        .hero-banner h1 {
+            font-size: 45px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); 
+        }
+
+        .hero-banner p {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ----- 상세 내용 디자인 박스 ----- */
+        .container { max-width: 900px; margin: -50px auto 50px auto; padding: 0 20px; position: relative; z-index: 5; }
+        .detail-card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 1px solid #edf2f7; }
+        
+        .back-btn { display: inline-flex; align-items: center; gap: 8px; color: #7b57df; font-weight: 700; font-size: 15px; margin-bottom: 30px; }
+        .title-area { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
+        .icon { width: 48px; height: 48px; border-radius: 50%; background: #7b57df; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .detail-card h2 { font-size: 26px; color: #7b57df; font-weight: 700; }
+        
+        .content { font-size: 15.5px; color: #444; line-height: 1.7; }
+        .content p { margin-bottom: 15px; }
+        .highlight-box { background: #f3f0ff; border-left: 4px solid #7b57df; padding: 20px; border-radius: 4px 12px 12px 4px; margin: 25px 0; }
+        .highlight-box h3 { color: #431fa1; margin-bottom: 8px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> 메인 홈</a>
+        <a href="#"><i class="fa-regular fa-bell"></i> 공지사항</a>
+    </header>
+
+    <section class="hero-banner">
+        <h1>Pulio CS MANUAL</h1>
+        <p>고객의 하루를 더 편안하게, 폴리오 CS 매뉴얼</p>
+    </section>
+
+    <main class="container">
+        <div class="detail-card">
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 홈으로 돌아가기</a>
+            <div class="title-area">
+                <div class="icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                <h2>주문 취소 안내</h2>
+            </div>
+            <div class="content">
+                <p>고객 접수 시 주문 상태를 최우선으로 확인한 뒤 안내를 진행해 주시기 바랍니다.</p>
+                <div class="highlight-box">
+                    <h3>물류 배송 준비 전 취소</h3>
+                    <p>• 고객센터 혹은 구매 채널 마이페이지를 통해 즉시 취소 및 환불 처리가 가능합니다.</p>
+                    <p>• 주문번호 조회 후 송장 발송 여부를 먼저 크로스체크해 주세요.</p>
+                </div>
+                <div class="highlight-box">
+                    <h3>이미 출고(송장 등록) 완료된 경우</h3>
+                    <p>• 이미 배송 중이거나 택배사 인계가 끝난 상태에서는 즉시 취소가 불가합니다.</p>
+                    <p>• 가이드: 상품을 수령하신 후 반품(단순변심 왕복 택배비 발생) 처리를 진행해 주셔야 함을 안내 바랍니다.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
