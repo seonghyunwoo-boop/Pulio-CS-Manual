@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교환 - Pulio CS MANUAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+        body { background-color: #f8f9fc; color: #333; }
+        a { text-decoration: none; color: inherit; }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px 10%;
+            background-color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            color: #666;
+            gap: 20px;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+        }
+
+        .hero-banner {
+            position: relative;
+            height: 420px;
+            background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 10%;
+            padding-top: 60px;
+        }
+
+        .hero-banner h1 {
+            font-size: 45px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); 
+        }
+
+        .hero-banner p {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+        }
+
+        .container { max-width: 900px; margin: -50px auto 50px auto; padding: 0 20px; position: relative; z-index: 5; }
+        .detail-card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 1px solid #edf2f7; }
+        
+        .back-btn { display: inline-flex; align-items: center; gap: 8px; color: #4b89dc; font-weight: 700; font-size: 15px; margin-bottom: 30px; }
+        .title-area { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
+        .icon { width: 48px; height: 48px; border-radius: 50%; background: #4b89dc; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .detail-card h2 { font-size: 26px; color: #4b89dc; font-weight: 700; }
+        
+        .content { font-size: 15.5px; color: #444; line-height: 1.7; }
+        .content p { margin-bottom: 15px; }
+        .highlight-box { background: #eef5fc; border-left: 4px solid #4b89dc; padding: 20px; border-radius: 4px 12px 12px 4px; margin: 25px 0; }
+        .highlight-box h3 { color: #1e3a8a; margin-bottom: 8px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> 메인 홈</a>
+        <a href="#"><i class="fa-regular fa-bell"></i> 공지사항</a>
+    </header>
+
+    <section class="hero-banner">
+        <h1>Pulio CS MANUAL</h1>
+        <p>고객의 하루를 더 편안하게, 폴리오 CS 매뉴얼</p>
+    </section>
+
+    <main class="container">
+        <div class="detail-card">
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 홈으로 돌아가기</a>
+            <div class="title-area">
+                <div class="icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+                <h2>교환 접수 안내</h2>
+            </div>
+            <div class="content">
+                <p>제품 교환 프로세스 및 기준 안내 가이드입니다.</p>
+                <div class="highlight-box">
+                    <h3>교환 기간 및 기준</h3>
+                    <p>• 고객이 상품을 수령한 날로부터 7일 이내에만 교환 신청이 가능합니다.</p>
+                    <p>• 단순 변심에 의한 색상 및 옵션 교환 시 왕복 배송비가 청구됩니다.</p>
+                </div>
+                <div class="highlight-box">
+                    <h3>초기 불량 / 오배송</h3>
+                    <p>• 본사의 과실이거나 기기 초기 불량인 경우, 무상으로 동일 제품 교환을 진행합니다.</p>
+                    <p>• 불량 접수 시 불량 상태가 나온 사진이나 영상을 사전에 확보하는 것이 필수입니다.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
