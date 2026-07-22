@@ -336,6 +336,11 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
       <span class="eyebrow"><i class="fa-solid fa-headset"></i> PULIO CUSTOMER SERVICE</span>
       <h1>Pulio CS MANUAL</h1>
       <p>고객 문의를 빠르게 찾고, 정확한 기준으로 판단하며, 일관된 답변을 제공하기 위한 풀리오 통합 CS 매뉴얼</p>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="manualSearch" type="search" placeholder="제품명, 고객 표현, 업무 또는 정책을 검색해 주세요.">
+        <button id="searchClear" class="search-clear" aria-label="검색어 지우기"><i class="fa-solid fa-xmark"></i></button>
+        <div id="searchResults" class="search-results" role="listbox" aria-label="검색 결과"></div>
       </div>
       <span id="syncStatusText" class="hidden" aria-hidden="true"></span>
       <div id="smartGuide" class="smart-guide"></div>
@@ -451,12 +456,7 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
   </div>
 </section>
 
-<div id="firebaseError" class="firebase-error"></div>
-
-<footer class="footer">
-  <div>기획 및 제작 | 성현우</div>
-  <div>© 2026 Pulio. All Rights Reserved.</div>
-</footer>
+<div id="firebaseError" class="firebase-error"></div><footer>Pulio CS MANUAL · 내부 업무 참고용</footer>
 
 <script>
 const pages = {
@@ -1990,6 +1990,7 @@ window.v22OpenFavorite=function(i){const x=getFavs()[i];if(!x)return;if(x.type==
 window.v22RemoveFavorite=function(i){const f=getFavs();f.splice(i,1);setFavs(f);renderFavorites();v22ApplyEnhancements(currentPageKey())}
 function renderRecent(){const body=document.getElementById('v22PanelBody'),r=getRecent();if(!r.length){body.innerHTML='<div class="v22-empty">답변 문구를 복사하면 최근 사용 내역이 표시됩니다.</div>';return}body.innerHTML=`<div class="v22-list">${r.map((x,i)=>`<button class="v22-list-item" onclick="v22CopyRecent(${i})"><i class="fa-regular fa-copy"></i><span><strong>${esc(x.title)}</strong><small>${esc((x.text||'').slice(0,72))}</small></span></button>`).join('')}</div><div style="height:12px"></div><button class="v22-chip" onclick="localStorage.removeItem('${RECENT_KEY}');renderRecent()">기록 비우기</button>`}
 window.v22CopyRecent=function(i){const x=getRecent()[i];if(!x)return;const done=()=>v22Toast('최근 문구를 다시 복사했습니다.');if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(x.text).then(done).catch(()=>v22Fallback(x.text,done));else v22Fallback(x.text,done)}
+function homeDashboard(){if(document.getElementById('v22Dashboard'))return;const grid=document.querySelector('.category-grid,.menu-grid,#categoryGrid');if(!grid)return;const sec=document.createElement('section');sec.id='v22Dashboard';sec.className='v22-dashboard';sec.innerHTML=`<div class="v22-dashboard-grid"><div class="v22-dashboard-card"><h3><i class="fa-solid fa-bolt"></i> 빠른 상담</h3><p>자주 쓰는 업무로 바로 이동합니다.</p><div class="v22-chip-row"><button class="v22-chip" onclick="openPage('delivery')">배송</button><button class="v22-chip" onclick="openPage('exchange')">교환</button><button class="v22-chip" onclick="openPage('refund')">반품</button><button class="v22-chip" onclick="openPage('warranty')">A/S</button></div></div><div class="v22-dashboard-card"><h3><i class="fa-solid fa-route"></i> 증상 진단</h3><p>YES / NO 순서로 기본 확인을 진행합니다.</p><div class="v22-chip-row"><button class="v22-chip" onclick="v22OpenPanel('flow');v22StartFlow('oneSide')">한쪽 미작동</button><button class="v22-chip" onclick="v22OpenPanel('flow');v22StartFlow('heat')">온열</button></div></div><div class="v22-dashboard-card"><h3><i class="fa-solid fa-star"></i> 개인 도구</h3><p>브라우저에 저장되는 나만의 바로가기입니다.</p><div class="v22-chip-row"><button class="v22-chip" onclick="v22OpenPanel('favorites')">즐겨찾기</button><button class="v22-chip" onclick="v22OpenPanel('recent')">최근 복사</button></div></div></div>`;grid.parentNode.insertBefore(sec,grid)}
 window.v22ApplyEnhancements=function(key){setTimeout(()=>{addPageFavorite(key);decorateResponseFavorites();if(key==='home'||!key)homeDashboard()},0)}
 const originalOpenPage=window.openPage;if(typeof originalOpenPage==='function'){window.openPage=function(key){const r=originalOpenPage.apply(this,arguments);v22ApplyEnhancements(key);return r}}
 const originalShowHome=window.showHome;if(typeof originalShowHome==='function'){window.showHome=function(){const r=originalShowHome.apply(this,arguments);v22ApplyEnhancements('home');return r}}
