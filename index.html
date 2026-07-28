@@ -51,17 +51,17 @@ img{display:block;max-width:100%}
 .header-actions button:hover{color:var(--pulio)}
 
 /* Home */
-.hero{
-  position:relative;min-height:440px;padding:80px 8%;display:flex;align-items:center;overflow:hidden;
-  background:
-    linear-gradient(100deg,rgba(35,18,58,.84),rgba(75,29,145,.64),rgba(75,29,145,.18)),
-    url("https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1920&q=85") center/cover
+.hero{position:relative;width:100%;overflow:hidden;background:#d8c8ff;
 }
-.hero:after{
-  content:"";position:absolute;right:-120px;bottom:-190px;width:470px;height:470px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 68%)
+
+.hero-banner{display:block;width:100%;
 }
-.hero-inner{position:relative;z-index:2;max-width:780px}
+
+.hero-banner img{display:block;width:100%;height:auto;object-fit:cover;
+}
+
+.hero-inner{display:none;
+}
 .eyebrow{
   display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;
   background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
@@ -332,22 +332,24 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
 </header>
 
 <section id="homeView">
-  <section class="hero">
-    <div class="hero-inner">
-      <span class="eyebrow"><i class="fa-solid fa-headset"></i> PULIO CUSTOMER SERVICE</span>
-      <h1>Pulio CS MANUAL</h1>
-      <p>고객 문의를 빠르게 찾고, 정확한 기준으로 판단하며, 일관된 답변을 제공하기 위한 풀리오 통합 CS 매뉴얼</p>
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input id="manualSearch" type="search" placeholder="제품명, 고객 표현, 업무 또는 정책을 검색해 주세요.">
-        <button id="searchClear" class="search-clear" aria-label="검색어 지우기"><i class="fa-solid fa-xmark"></i></button>
-        <div id="searchResults" class="search-results" role="listbox" aria-label="검색 결과"></div>
-      </div>
-      <span id="syncStatusText" class="hidden" aria-hidden="true"></span>
-      <div id="smartGuide" class="smart-guide"></div>
-      <div id="searchIntentBox" class="search-intent-box" aria-live="polite"></div>
-    </div>
-  </section>
+<section class="hero">
+<div class="hero-banner">
+<img src="pulio-cs-hero.png" alt="Pulio CS Manual">
+</div>
+<div class="hero-inner" aria-hidden="true">
+<div class="search-box">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input id="manualSearch" type="search" placeholder="제품명, 고객 표현, 업무 또는 정책을 검색해 주세요.">
+<button id="searchClear" class="search-clear" aria-label="검색어 지우기">
+<i class="fa-solid fa-xmark"></i>
+</button>
+<div id="searchResults" class="search-results" role="listbox" aria-label="검색 결과"></div>
+</div>
+<span id="syncStatusText" class="hidden" aria-hidden="true"></span>
+<div id="smartGuide" class="smart-guide"></div>
+<div id="searchIntentBox" class="search-intent-box" aria-live="polite"></div>
+</div>
+</section>
 
   <main class="container">
     <div class="section-head">
