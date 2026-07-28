@@ -51,17 +51,8 @@ img{display:block;max-width:100%}
 .header-actions button:hover{color:var(--pulio)}
 
 /* Home */
-.hero{position:relative;width:100%;overflow:hidden;background:#d8c8ff;
-}
-
-.hero-banner{display:block;width:100%;
-}
-
-.hero-banner img{display:block;width:100%;height:auto;object-fit:cover;
-}
-
-.hero-inner{display:none;
-}
+.hero{position:relative;min-height:440px;padding:80px 8%;display:flex;align-items:center;overflow:hidden;background:url("pulio-cs-hero.png") center center/cover no-repeat;}
+.hero-inner{position:relative;z-index:2;max-width:780px;}
 .eyebrow{
   display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;
   background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
@@ -190,12 +181,10 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
   .tool-grid{grid-template-columns:1fr}
 }
 @media(max-width:620px){
-  .category-grid{grid-template-columns:1fr}
-  .hero{padding:65px 6%;min-height:410px}
-  .hero h1{font-size:36px}
-  .brand-sub,.header-actions span{display:none}
-  .checks{grid-template-columns:1fr}
-  .page-icon{display:none}
+.category-grid{grid-template-columns:1fr}
+.brand-sub,.header-actions span{display:none}
+.checks{grid-template-columns:1fr}
+.page-icon{display:none}
 }
 
 /* Enhanced portal functions */
@@ -333,9 +322,6 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
 
 <section id="homeView">
 <section class="hero">
-<div class="hero-banner">
-<img src="pulio-cs-hero.png" alt="Pulio CS Manual">
-</div>
 <div class="hero-inner" aria-hidden="true">
 <div class="search-box">
 <i class="fa-solid fa-magnifying-glass"></i>
