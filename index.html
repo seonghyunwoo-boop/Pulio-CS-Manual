@@ -190,8 +190,8 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
 }
 .search-results.show{display:block}
 .search-result-item{
-  width:100%;border:0;background:#fff;text-align:left;padding:14px 18px;
-  display:flex;align-items:center;gap:13px;cursor:pointer;border-bottom:1px solid #f1edf5
+  width:100%;min-height:62px;border:0;background:#fff;text-align:left;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid #f1edf5;transition:background .18s ease;
 }
 .search-result-item:last-child{border-bottom:0}
 .search-result-item:hover,.search-result-item:focus{background:#f7f2ff;outline:none}
@@ -199,11 +199,10 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
   width:42px;height:42px;border-radius:12px;font-size:16px;background:#f0eaff;color:var(--pulio);
   display:grid;place-items:center;flex:0 0 auto
 }
-.search-results{max-height:430px;overflow-y:auto;}
-.search-result-text{min-width:0;flex:1;}
-.search-result-text strong{display:block;font-size:15px;font-weight:700;line-height:1.45;letter-spacing:-0.2px;color:var(--ink);
-.search-result-text span{display:block;margin-top:4px;font-size:13px;font-weight:400;line-height:1.5;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.search-result-text{min-width:0;flex:1;overflow:hidden;}
+.search-result-text strong{display:block;font-size:15px;font-weight:700;line-height:1.45;letter-spacing:-0.2px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-result-type{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f0eaff;color:var(--pulio);font-size:10px;font-weight:800;}
+.search-hint{padding:14px 18px;background:#faf8fc;border-top:1px solid var(--line);font-size:15px;font-weight:600;line-height:1.5;letter-spacing:-0.3px;color:var(--ink);}                           
 .search-target-flash{animation:searchFlash 2.2s ease;}
 @keyframes searchFlash{0%,100%{background:transparent}20%,70%{background:#fff1a8}}
 .update-admin{display:grid;grid-template-columns:160px 1fr auto;gap:10px;align-items:end}
@@ -1874,12 +1873,12 @@ return manualSearchIndex.map(item=>({...item,score:scoreSearchItem(item,raw,term
 function renderSearchResults(matches,raw){
 if(!raw.trim()){closeSearchResults();return;}
 if(!matches.length){
-resultBox.innerHTML='<div class="search-hint">일치하는 내용이 없습니다. 제품명이나 고객 표현을 다르게 입력해 주세요.</div>';
+resultBox.innerHTML=`<div class="search-hint">일치하는 내용이 없습니다. 제품명이나 고객 표현을 다르게 입력해 주세요.</div>`;
 resultBox.classList.add("show");
 return;
 }
 window.currentManualSearchResults=matches;
-resultBox.innerHTML=matches.map((item,index)=>`<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.subtitle)} · ${escapeHtml(makeSearchSnippet(item.text,raw))}</span></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
+resultBox.innerHTML=matches.map((item,index)=>`<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
 resultBox.classList.add("show");
 }
 function makeSearchSnippet(text,raw){
