@@ -36,7 +36,7 @@ img{display:block;max-width:100%}
 
 /* Header */
 .site-header{
-  position:sticky;top:0;z-index:60;height:68px;padding:0 5%;
+  position:relative;z-index:60;height:68px;padding:0 5%;
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(255,255,255,.95);border-bottom:1px solid var(--line);
   backdrop-filter:blur(12px)
@@ -196,13 +196,13 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
 .search-result-item:last-child{border-bottom:0}
 .search-result-item:hover,.search-result-item:focus{background:#f7f2ff;outline:none}
 .search-result-icon{
-  width:36px;height:36px;border-radius:11px;background:#f0eaff;color:var(--pulio);
+  width:42px;height:42px;border-radius:12px;font-size:16px;background:#f0eaff;color:var(--pulio);
   display:grid;place-items:center;flex:0 0 auto
 }
 .search-results{max-height:430px;overflow-y:auto;}
 .search-result-text{min-width:0;flex:1;}
-.search-result-text strong{display:block;font-size:13px;color:#2d2438;}
-.search-result-text span{display:block;font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.search-result-text strong{display:block;font-size:15px;font-weight:700;line-height:1.45;letter-spacing:-0.2px;color:var(--ink);
+.search-result-text span{display:block;margin-top:4px;font-size:13px;font-weight:400;line-height:1.5;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-result-type{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f0eaff;color:var(--pulio);font-size:10px;font-weight:800;}
 .search-target-flash{animation:searchFlash 2.2s ease;}
 @keyframes searchFlash{0%,100%{background:transparent}20%,70%{background:#fff1a8}}
