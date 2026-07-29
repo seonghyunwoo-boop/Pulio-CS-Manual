@@ -51,15 +51,16 @@ img{display:block;max-width:100%}
 .header-actions button:hover{color:var(--pulio)}
 
 /* Home */
-.hero{position:relative;min-height:440px;padding:80px 8%;display:flex;align-items:center;overflow:hidden;background:url("PULIO1.png") center center/cover no-repeat;}
-.hero-inner{position:relative;z-index:2;max-width:780px;}
+.hero{position:relative;min-height:440px;padding:80px 8%;display:flex;align-items:center;overflow:hidden;background:url("PULIO.png") right center/cover no-repeat;
+.hero-inner{position:relative;z-index:2;max-width:520px;padding-left:40px;}
+.hero-brand{font-size:clamp(44px,5vw,64px);font-weight:800;line-height:1;color:#4620a8;letter-spacing:-2px;}
+.hero-title{margin-top:8px;font-size:clamp(40px,5vw,60px);font-weight:800;line-height:1.08;color:#20203b;letter-spacing:-2px;}
+.hero-desc{margin-top:22px;font-size:16px;font-weight:600;line-height:1.8;color:#3d3d55;}
 .eyebrow{
   display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;
   background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
   color:#fff;font-size:12px;font-weight:700
 }
-.hero h1{margin-top:16px;color:#fff;font-size:clamp(38px,5vw,58px);font-weight:800;letter-spacing:-2px}
-.hero p{color:rgba(255,255,255,.94);font-size:16px;font-weight:500;margin-top:10px}
 .search-box{display:none !important;position:relative;margin-top:28px;max-width:660px}
 #v22Dashboard{display:none !important}
 .search-box>i{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:#827a8a}
@@ -322,7 +323,20 @@ footer{border-top:1px solid var(--line);padding:30px;text-align:center;color:#9a
 
 <section id="homeView">
 <section class="hero">
-<div class="hero-inner" aria-hidden="true">
+
+<div class="hero-inner">
+
+<div class="hero-brand">PULIO</div>
+
+<h1 class="hero-title">
+CS MANUAL
+</h1>
+
+<p class="hero-desc">
+고객 문의를 빠르게 찾고, 정확한 기준으로 판단하여<br>
+일관된 답변을 제공하기 위한 풀리오 통합 CS 매뉴얼
+</p>
+
 <div class="search-box">
 <i class="fa-solid fa-magnifying-glass"></i>
 <input id="manualSearch" type="search" placeholder="제품명, 고객 표현, 업무 또는 정책을 검색해 주세요.">
