@@ -376,9 +376,9 @@ CS MANUAL
         <h3>주문·결제</h3><p>주문 확인, 결제, 쿠폰, 증빙 및 부분 취소</p>
       </article>
 
-      <article class="category-card" data-page="delivery" data-keywords="배송 송장 지연 분실 주소 예약" onclick="openPage('delivery')">
+      <article class="category-card" data-page="delivery" data-keywords="배송 출고 송장 지연 분실 주소 예약 오배송 구성품 누락 부속품 케이블 설명서 파우치 박스 비어있음 일부만 배송" onclick="openPage('delivery')">
         <div class="card-top"><div class="icon c8"><i class="fa-solid fa-truck-fast"></i></div><i class="fa-solid fa-chevron-right arrow"></i></div>
-        <h3>배송·출고</h3><p>출고, 예약 판매, 배송 지연 및 분실 대응</p>
+        <h3>배송·출고</h3><p>출고 상태, 배송 지연, 분실, 오배송 및 수령 구성품 누락</p>
       </article>
 
       <article class="category-card" data-page="cancel" data-keywords="취소 출고전 송장 배송중" onclick="openPage('cancel')">
@@ -570,18 +570,67 @@ order:{
 },
 delivery:{
  title:"배송·출고", subtitle:"출고 전부터 배송 완료 이후까지 단계별 문의를 관리합니다.", icon:"fa-truck-fast",
- content:`<section class="content-card"><h2>배송 문의 분류</h2><div class="table-wrap"><table><tr><th>문의</th><th>확인사항</th><th>처리방향</th></tr><tr><td>예약 출고</td><td>상품명, 예정일</td><td>출고 시작 기준 안내</td></tr><tr><td>배송 지연</td><td>송장 흐름, 지역 물량</td><td>배송사 확인</td></tr><tr><td>배송 완료 미수령</td><td>위탁 장소, 기사 연락</td><td>배송사 확인 요청</td></tr><tr><td>주소 변경</td><td>출고 상태</td><td>변경 가능 여부 판단</td></tr></table></div></section>
-<div data-practical-enhancement="v1">
+ content:`<section class="content-card alert"><span class="kicker">업무 구분</span><h2>배송 상태 문의와 수령 상품 문제를 구분합니다.</h2><p>송장, 배송 지연, 미수령은 배송 흐름을 기준으로 확인하고, 오배송과 구성품 누락은 고객이 실제 수령한 상품과 주문 정보를 비교하여 판단합니다.</p></section>
+ <section class="content-card"><h2>배송 문의 분류</h2><div class="table-wrap"><table><thead><tr><th>문의 유형</th><th>필수 확인</th><th>처리 방향</th></tr></thead><tbody><tr><td>예약 출고</td><td>상품명, 주문일, 출고 예정일</td><td>예약일은 수령일이 아닌 출고 시작 예정일 기준으로 안내</td></tr><tr><td>출고 지연</td><td>주문 상태, 물류 전달 여부, 송장 등록 여부</td><td>실제 출고 진행 상태 확인 후 안내</td></tr><tr><td>배송 지연</td><td>송장 흐름, 집하 여부, 지역 배송 상황</td><td>배송사 이동 상태 확인 후 안내</td></tr><tr><td>배송 완료 미수령</td><td>배송 위치, 기사 연락, 주변 수령 여부</td><td>배송사 확인 전 분실로 확정하지 않음</td></tr><tr><td>주소 변경</td><td>송장 등록, 집하 및 물류 전달 여부</td><td>출고 전 변경 가능 여부 확인</td></tr><tr><td>오배송</td><td>주문 상품, 실제 수령 상품, 송장 및 박스 사진</td><td>오출고 여부 확인 후 회수▪재출고 절차 안내</td></tr><tr><td>구성품 누락</td><td>제품별 기본 구성, 박스 내부, 전체 구성품 사진</td><td>구성품 단독 발송 또는 상품 확인 절차로 구분하여 처리</td></tr></tbody></table></div></section>
+ <section class="content-card"><h2>배송 상담 전 필수 확인</h2><div class="checks"><div class="check">□ 주문번호·판매처</div><div class="check">□ 상품명·옵션·수량</div><div class="check">□ 주문일·수령일</div><div class="check">□ 송장번호·택배사</div><div class="check">□ 송장 최초 집하 여부</div><div class="check">□ 예약상품·분리출고 여부</div><div class="check">□ 실제 수령한 박스 수량</div><div class="check">□ 고객이 확인한 누락 품목</div></div></section>
+ <section class="content-card"><h2>배송 상태별 판단 FLOW</h2><div class="flow"><div class="flow-step"><strong>1. 송장 미등록</strong>출고 예정일, 주문 상태, 물류 전달 여부를 확인합니다.</div><div class="flow-step"><strong>2. 송장 등록 후 이동 없음</strong>송장 등록 당일인지, 1영업일 이상 경과했는지 확인합니다.</div><div class="flow-step"><strong>3. 집하 완료 후 배송 지연</strong>배송사 흐름, 지역 물량 및 배송 지연 여부를 확인합니다.</div><div class="flow-step"><strong>4. 배송 완료 후 미수령</strong>문 앞, 공동현관, 경비실, 무인택배함, 가족 수령 여부를 확인한 뒤 배송사에 문의합니다.</div><div class="flow-step"><strong>5. 일부 상품만 수령</strong>주문 수량과 송장 개수를 확인하고 분리출고 또는 구성품 누락으로 분기합니다.</div></div></section>
+ <section class="content-card"><h2>수령 상품 문제 분류</h2><div class="table-wrap"><table><thead><tr><th>고객 표현</th><th>분류</th><th>확인 기준</th></thead><tbody><tr><td>주문한 상품과 다른 상품이 왔어요.</td><td>오배송</td><td>주문 상품과 실제 수령 상품 비교</td></tr><tr><td>한 개만 왔어요.</td><td>분리출고 또는 수량 누락</td><td>주문 수량, 박스 수량, 송장 개수 확인</td></tr><tr><td>케이블이나 설명서가 없어요.</td><td>기본 구성품 누락</td><td>제품별 기본 구성과 전체 포장 사진 확인</td></tr><tr><td>사은품이 오지 않았어요.</td><td>프로모션·사은품 누락</td><td>행사 대상 여부와 지급 방식을 확인</td></tr><tr><td>박스가 비어 있거나 개봉 흔적이 있어요.</td><td>배송 중 유실 의심</td><td>외부 박스, 봉인 상태, 송장, 내부 포장 사진 확인</td></tr></tbody></table></div></section>
+ <section class="content-card"><h2>구성품 누락 처리 FLOW</h2><div class="flow"><div class="flow-step"><strong>1. 주문 상품 확인</strong>주문번호, 상품명, 모델명과 옵션을 확인합니다.</div><div class="flow-step"><strong>2. 기본 구성 확인</strong>제품별 안내에 등록된 기본 구성품과 고객이 수령한 품목을 비교합니다.</div><div class="flow-step"><strong>3. 포장 전체 확인</strong>컬러박스, 완충재, 파우치 내부 등 모든 포장 공간을 다시 확인하도록 안내합니다.</div><div class="flow-step"><strong>4. 사진 자료 요청</strong>외부 박스, 송장, 컬러박스 내부와 수령한 전체 구성품이 한 번에 보이는 사진을 요청합니다.</div><div class="flow-step"><strong>5. 처리 방법 판단</strong>누락 품목을 단독 발송할 수 있는지, 상품 회수가 필요한지 담당 기준을 확인합니다.</div><div class="flow-step"><strong>6. 접수 및 이력 기록</strong>누락 품목명, 사진 확인 여부, 발송 또는 회수 접수 내용을 상담 이력에 기록합니다.</div></div></section>
+ <section class="content-card alert warning"><h2>구성품 누락 처리 주의사항</h2><ul><li>고객의 설명만으로 출고 누락을 확정하지 않습니다.</li><li>제품별 기본 구성품과 행사 사은품을 혼동하지 않습니다.</li><li>구성품 단독 발송 가능 여부를 확인하기 전 발송을 약속하지 않습니다.</li><li>본품이나 핵심 부속이 누락된 경우 단순 부속품 발송으로 처리하지 않습니다.</li><li>박스 훼손이나 개봉 흔적이 있는 경우 배송 중 유실 가능성도 함께 확인합니다.</li><li>구성품 누락만으로 상품 전체 교환을 먼저 안내하지 않습니다.</li></ul></section>
+ <section class="content-card"><h2>구성품 누락 판단 기준</h2><div class="table-wrap"><table><thead><tr><th>누락 유형</th><th>예시</th><th>권장 처리</th></tr></thead><tbody><tr><td>일반 부속품</td><td>설명서, 케이블, 파우치 등</td><td>재고 상태와 단독 발송 여부 확인</td></tr><tr><td>작동 필수 부속</td><td>충전 장치, 컨트롤러, 연결 부품 등</td><td>단독 발송 또는 상품 확인 절차 검토</td></tr><tr><td>본품 수량 누락</td><td>좌우 한 세트 중 한쪽 미수령</td><td>출고 수량과 포장 이력 확인 후 처리</td></tr><tr><td>행사 사은품 누락</td><td>쇼핑백, 파우치, 행사 증정품 등</td><td>프로모션▪사은품 기준으로 이동</td></tr><tr><td>배송 중 유실 의심</td><td>박스 파손, 개봉 흔적, 내용물 유실</td><td>포장 상태 확인 후 접수 이관</td></tr></tbody></table></div></section>
+ <section class="content-card"><h2>분실▪오배송 처리</h2><h3>분실 의심</h3><ol><li>송장 흐름과 배송 완료 시간을 확인합니다.</li><li>문 앞, 경비실, 무인 택배함 및 주변 수령 여부를 재확인합니다.</li><li>확인되지 않을 경우 배송사 사고 접수 또는 내부 물류 확인으로 요청합니다.</li></ol><h3>오배송</h3><ol><li>주문 상품명, 옵션, 수량을 확인합니다</li><li>외부 박스, 송장, 실제 수령 상품의 사진을 요청합니다.</li><li>상품이 다른 경우 임의 사용을 중단하도록 안내합니다.</li><li>오출고 확인 후 회수와 재출고 절차를 안내 및 접수 이관합니다</li></ol></section>
+ <section class="content-card"><h2>배송 상담 이력 필수 기록</h2><div class="checks"><div class="check">□ 배송 문의 유형</div><div class="check">□ 송장 흐름 및 확인 시각</div><div class="check">□ 고객 수령 여부</div><div class="check">□ 누락 또는 오배송 품목</div><div class="check">□ 사진 수신 여부</div><div class="check">□ 배송사 확인 결과</div><div class="check">□ 물류 이관 여부</div><div class="check">□ 최종 안내 내용</div></div></section>
+ <section class="content-card response-category"data-response-category="배송·출고"><h2>배송·출고 실무 답변</h2><div class="response-template-grid"><article class="response-template"
+ data-response-template
+ data-category="배송·출고"
+ data-search="구성품 누락 부속품 없음 케이블 설명서 파우치 빠짐 사진 요청"><div class="response-template-head"><h3>구성품 누락 확인 요청</h3><span class="response-badge">배송·출고</span></div><div class="copy-box" id="delivery-missing-component">
+ 안녕하세요, 고객님.
+ 문의 주셔서 감사합니다.
 
-<section class="content-card"><h2>배송 상담 전 필수 확인</h2><div class="checks"><div class="check">□ 주문번호·판매처</div><div class="check">□ 출고 예정일</div><div class="check">□ 송장번호·택배사</div><div class="check">□ 송장 최초 집하 여부</div><div class="check">□ 배송지·연락처</div><div class="check">□ 예약상품·분리출고 여부</div></div></section>
-<section class="content-card"><h2>배송 상태별 판단 FLOW</h2><ol><li><strong>송장 미등록:</strong> 출고 예정일과 물류 전달 여부 확인</li><li><strong>송장 등록 후 움직임 없음:</strong> 등록 당일인지, 1영업일 이상 경과했는지 확인</li><li><strong>집하 완료 후 지연:</strong> 택배사 흐름과 지역 지연 여부 확인</li><li><strong>배송 완료·미수령:</strong> 배송 위치, 공동현관, 경비실, 가족 수령 여부 확인 후 기사 확인</li><li><strong>장기 무흐름:</strong> 분실 의심으로 물류·택배사 확인 요청</li></ol></section>
-<section class="content-card"><h2>주요 배송 문의 처리 기준</h2><table><thead><tr><th>문의 유형</th><th>확인 순서</th><th>처리 기준</th></tr></thead><tbody><tr><td>주소 변경</td><td>송장 등록·집하 여부 확인</td><td>물류 전달 전만 변경 가능성 확인, 출고 후에는 택배사 전환 또는 수령 후 반품 안내</td></tr><tr><td>배송 완료 미수령</td><td>기사 배송 위치→주변 수령→CCTV 가능 여부</td><td>기사 확인 전 분실 확정 금지</td></tr><tr><td>합배송 문의</td><td>주문번호·출고지·예약일 확인</td><td>합배송을 보장하지 않으며 주문별 또는 상품별 분리출고 가능</td></tr><tr><td>예약상품</td><td>상세페이지 예약일·변경 공지 확인</td><td>예약일은 출고 시작일이며 수령일이 아님</td></tr><tr><td>도서산간</td><td>추가 배송일·추가비 확인</td><td>지역별 택배사 일정에 따라 지연 가능</td></tr></tbody></table></section>
-<section class="content-card"><h2>분실·오배송 처리</h2><h3>분실 의심</h3><ol><li>송장 흐름과 배송 완료 시간을 확인합니다.</li><li>택배기사에게 실제 배송 위치를 확인합니다.</li><li>고객에게 문 앞·경비실·무인택배함·가족 수령 여부를 재확인합니다.</li><li>미확인 시 택배사 사고 접수 또는 내부 물류 확인으로 이관합니다.</li><li>재출고·환불은 책임 소재 확인 후 진행합니다.</li></ol><h3>오배송</h3><p>수령 상품의 외부 박스, 송장, 제품명, 옵션, 구성품 사진을 요청합니다. 회수 전 임의 사용을 중단하도록 안내하고, 오출고가 확인되면 회수와 재출고 절차를 안내합니다.</p></section>
-<section class="content-card"><h2>배송 지연 안내 문구</h2><div class="template">안녕하세요, 고객님.<br>풀리오입니다.<br><br>문의 주신 상품 관련하여 안내드립니다.<br><br>주문하신 상품은 현재 배송사 이동 중인 것으로 확인됩니다. 배송은 지역 물량과 배송사 일정에 따라 다소 지연될 수 있으며, 정확한 수령일을 확정하여 안내드리기 어려운 점 양해 부탁드립니다.<br><br>송장 흐름이 장시간 확인되지 않을 경우 배송사 확인 후 추가 안내드리겠습니다.<br><br>감사합니다.</div></section>
+ 문의하신 구성품 누락 여부를 확인하기 위해 누락된 구성품명을 남겨주시기 바랍니다.
 
-</div>
-`
-},
+ 아울러 정확한 확인을 위해 번거로우시겠지만 상품을 꺼내기 전 제품 박스 내부가 보이도록 촬영한 사진을 첨부해 주시면 확인 후 안내드리겠습니다.
+
+ 추가로 궁금하신 사항이 있으시면 언제든 문의 부탁드립니다.
+ 감사합니다.
+ <button class="copy-btn"
+ type="button"
+ onclick="copyText('delivery-missing-component')"><i class="fa-regular fa-copy"></i></button></div></article>
+
+ <article class="response-template"
+ data-response-template
+ data-category="배송·출고"
+ data-search="일부 상품 미수령 한개만 배송 분리출고 송장 추가"><div class="response-template-head"><h3>일부 상품 미수령 확인</h3><span class="response-badge">배송·출고</span></div><div class="copy-box" id="delivery-partial-receipt">
+ 안녕하세요, 고객님.
+ 문의 주셔서 감사합니다.
+
+ 주문하신 상품 중 일부만 수령하신 경우 출고 내역 확인 후 안내 도와드리도록 하겠습니다.
+ 주문 시 주문 번호와 현재 수령하신 상품명 및 수량을 확인해 주시면 분리 출고 여부 확인 후 안내드리도록 하겠습니다.
+
+ 추가로 궁금하신 사항이 있으시면 언제든 문의 부탁드립니다.
+ 감사합니다.
+ <button class="copy-btn"
+ type="button"
+ onclick="copyText('delivery-partial-receipt')"><i class="fa-regular fa-copy"></i></button></div></article>
+
+ <article class="response-template"
+ data-response-template
+ data-category="배송·출고"
+ data-search="오배송 다른 상품 다른 색상 옵션 수량 잘못 배송 사진 요청">
+ <div class="response-template-head"><h3>오배송 사진 요청</h3><span class="response-badge">배송·출고</span></div><div class="copy-box" id="delivery-wrong-item">
+ 안녕하세요, 고객님.
+ 먼저, 이용에 불편 드려 죄송합니다.
+
+ 문의 주신 오배송 여부를 확인하기 위해 외부 배송 박스의 송장과 실제 수령하신 제품 사진을 촬영 부탁드립니다.
+ 수령하신 상품 확인 후 안내 도와드리도록 하겠습니다.
+
+ 감사합니다.
+ <button class="copy-btn"
+ type="button"
+ onclick="copyText('delivery-wrong-item')">
+ <i class="fa-regular fa-copy"></i></button></div></article></div></section>
+ },
+
 cancel:{
  title:"주문 취소", subtitle:"주문 취소 가능 여부와 단계별 처리 방법을 안내합니다.", icon:"fa-cart-shopping",
  content:`
@@ -2146,7 +2195,10 @@ const searchIntentRules=[
  {label:'반품',phrases:['반품','환불','변심'],page:'refund'},
  {label:'배송·출고',phrases:['배송','출고','언제와','송장','택배'],page:'delivery'},
  {label:'회수·수거',phrases:['회수','수거','기사님','방문'],page:'refund'},
- {label:'사은품·누락',phrases:['사은품','누락','없어요','구성품'],page:'promotion'},
+ {label:'사은품·누락',phrases:['배송','출고','언제와','송장','택배','배송이 안와','배송이 멈춤'],page:'delivery'},
+ {label:'구성품 누락',phrases:['구성품','부속품','케이블이 없음','설명서가 없음','구성품이 없음','한쪽이 없음','박스에 없음','빠져 있음,','누락 배송'],page:'delivery'},
+ {label:'오배송',phrases:['다른 상품','잘못 배송','오배송','다른 색상','다른 옵션','수량이 다름'],page:'delivery'},
+ {label:'사은품 누락',phrases:['사은품','증정품','이벤트 상품','경품','쇼핑백이 없음','파우치가 없음','사은품이 안옴'],page:'promotion'},
  {label:'가격·쿠폰',phrases:['가격','쿠폰','할인','싸졌','차액'],page:'order'}
 ];
 function extractSearchIntents(raw){const q=normalize(raw);if(!q)return[];return searchIntentRules.filter(r=>r.phrases.some(p=>q.includes(normalize(p)))).slice(0,5)}
@@ -2159,7 +2211,8 @@ const templateRelationGroups=[
  {terms:['배송','출고','송장'],links:['배송 지연','배송 완료 미수령','주소 변경']},
  {terms:['반품','환불','배송비'],links:['반품 접수','반품 배송비','반품 승인']},
  {terms:['교환','검수','재출고'],links:['교환 접수','검수 결과 안내','재출고']},
- {terms:['사은품','구성품','누락'],links:['사은품 별도 발송','사진 요청','구매정보 요청']},
+ {terms:['사은품','구성품','누락'],links:['구성품 누락 확인 요청','일부 상품 미수령 확인','오배송 사진 요청']},
+ {terms:['사은품','증정품','경품','프로모션'],links:['사은품 지급 대상 확인','사은품 별도 발송','행사 적용 여부 확인']},
  {terms:['가격','쿠폰','할인'],links:['가격 변동 안내','쿠폰 소급 적용 불가','행사 대상 확인']}
 ];
 function injectTemplateRelations(){
