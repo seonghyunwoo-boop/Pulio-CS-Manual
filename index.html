@@ -614,22 +614,36 @@ delivery:{
  onclick="copyText('delivery-partial-receipt')"><i class="fa-regular fa-copy"></i></button></div></article>
 
  <article class="response-template"
- data-response-template
- data-category="배송·출고"
- data-search="오배송 다른 상품 다른 색상 옵션 수량 잘못 배송 사진 요청">
- <div class="response-template-head"><h3>오배송 사진 요청</h3><span class="response-badge">배송·출고</span></div><div class="copy-box" id="delivery-wrong-item">
- 안녕하세요, 고객님.
- 먼저, 이용에 불편 드려 죄송합니다.
+  data-response-template
+  data-category="배송·출고"
+  data-search="오배송 다른 상품 다른 색상 옵션 수량 잘못 배송 사진 요청">
 
- 문의 주신 오배송 여부를 확인하기 위해 외부 배송 박스의 송장과 실제 수령하신 제품 사진을 촬영 부탁드립니다.
- 수령하신 상품 확인 후 안내 도와드리도록 하겠습니다.
+  <div class="response-template-head">
+    <h3>오배송 사진 요청</h3>
+    <span class="response-badge">배송·출고</span>
+  </div>
 
- 감사합니다.
- <button class="copy-btn"
- type="button"
- onclick="copyText('delivery-wrong-item')">
- <i class="fa-regular fa-copy"></i></button></div></article></div></section>
- },
+  <div class="copy-box" id="delivery-wrong-item">
+안녕하세요, 고객님.
+먼저, 이용에 불편 드려 죄송합니다.
+
+문의 주신 오배송 여부를 확인하기 위해 외부 배송 박스의 송장과 실제 수령하신 제품 사진을 촬영 부탁드립니다.
+수령하신 상품 확인 후 안내 도와드리도록 하겠습니다.
+
+감사합니다.
+
+    <button class="copy-btn"
+      type="button"
+      onclick="copyText('delivery-wrong-item')">
+      <i class="fa-regular fa-copy"></i>
+    </button>
+  </div>
+</article>
+
+</div>
+</section>
+`
+},
 
 cancel:{
  title:"주문 취소", subtitle:"주문 취소 가능 여부와 단계별 처리 방법을 안내합니다.", icon:"fa-cart-shopping",
