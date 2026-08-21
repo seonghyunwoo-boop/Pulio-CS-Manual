@@ -781,7 +781,11 @@ operation:{
 },
 notice:{
  title:"공지사항", subtitle:"긴급 공지와 중요 운영 변경 사항을 관리합니다.", icon:"fa-bell",
- content:`<section class="content-card"><h2>공지 등록 영역</h2><p>중요 공지와 적용 일자를 기록합니다.</p></section>`
+ content:`
+<section class="content-card"><h2>공지 검색</h2><p style="margin-bottom:14px;color:var(--muted);">공지 제목 또는 내용에 포함된 단어를 검색할 수 있습니다.</p><div style="position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8b8292;"></i><input id="noticeSearch" type="search" placeholder="공지 제목 또는 내용을 검색해 주세요." oninput="filterNoticeSearch()" style="width:100%;height:50px;border:1px solid var(--line);border-radius:13px;padding:0 48px 0 44px;outline:none;background:#fff;font:inherit;"><button id="noticeSearchClear" type="button" onclick="clearNoticeSearch()" aria-label="공지 검색어 지우기" style="display:none;position:absolute;right:13px;top:50%;transform:translateY(-50%);border:0;background:none;color:#8b8292;cursor:pointer;font-size:16px;"><i class="fa-solid fa-xmark"></i></button></div><div id="noticeSearchStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-weight:600;"></div></section>
+
+<section class="content-card"><h2>공지 등록 영역</h2><p>중요 공지와 적용 일자를 기록합니다.</p></section>
+`
 },
 updates:{
  title:"업데이트", subtitle:"매뉴얼 수정 이력과 적용 일자를 관리합니다.", icon:"fa-rotate",
