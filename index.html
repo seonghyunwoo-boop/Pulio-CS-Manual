@@ -1882,7 +1882,6 @@ function renderProductComparison(key){
 }
 function applyPortalEnhancements(key){
  const root=document.getElementById('pageContent');if(!root)return;
- }
  if(relatedResponseMap[key]&&!root.querySelector('[data-extension="related-responses"]'))root.insertAdjacentHTML('beforeend',responseLinkSection(key));
  enhanceCopyAreas();
  if(key==='response')injectTemplateRelations();
