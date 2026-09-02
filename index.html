@@ -210,6 +210,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;}
   display:grid;place-items:center;flex:0 0 auto
 }
 .search-result-text{min-width:0;flex:1;overflow:hidden;}
+.search-result-text small{display:block;margin-top:2px;font-size:11px;font-weight:700;color:#8c8095;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.search-result-text p{margin:4px 0 0;font-size:12px;line-height:1.5;color:#655f6d;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .search-result-text strong{display:block;font-size:15px;font-weight:700;line-height:1.45;letter-spacing:-0.2px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-result-type{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f0eaff;color:var(--pulio);font-size:10px;font-weight:800;}
 .search-hint{padding:14px 18px;background:#faf8fc;border-top:1px solid var(--line);font-size:15px;font-weight:600;line-height:1.5;letter-spacing:-0.3px;color:var(--ink);}                           
@@ -1948,10 +1950,10 @@ const searchSynonyms=[
 ["손","손마사지기","손마사기","핸드마사지기"],
 ["목어깨","목마사지기","어깨마사지기","목어깨마사지기"],
 ["부츠","마사지부츠","풀리션","발마사지"],
-["유상","유상비용","비용","수리비","as비용","에이에스비용"],
+["유상","유상비용","비용","수리비","as비용","에이에스비용","유상교환","유상as","보증기간경과","수리비용"],
 ["무상","품질보증","보증기간","무상as","무상수리"],
-["반품","환불","돌려보내","마음에안들어","단순변심"],
-["교환","바꿔","새제품","오배송"],
+["반품","환불","돌려보내","마음에안들어","단순변심","반품비","반품배송비","왕복배송비","회수","수거"],
+["교환","바꿔","새제품","오배송","재출고","맞교환","회수후출고","교환배송비"],
 ["취소","주문취소","출고전취소"],
 ["배송","출고","택배","송장","안왔어","도착"],
 ["충전","배터리","전원","충전안돼","충전불량"],
@@ -2033,7 +2035,10 @@ if(subtitle.includes(term))score+=8;
 if(text.includes(term))score+=4;
 });
 if(item.type==="제품"&&terms.some(term=>title.includes(term)))score+=25;
-if(item.type==="유상 비용"&&terms.some(term=>term.includes("유상")||term.includes("비용")))score+=25;
+if(item.key==="refund"&&terms.some(term=>["반품","환불","단순변심","돌려보내"].includes(term)))score+=40;
+if(item.key==="exchange"&&terms.some(term=>["교환","바꿔","새제품","오배송"].includes(term)))score+=40;
+if(item.key==="price"&&terms.some(term=>["유상","유상비용","비용","수리비","as비용","에이에스비용"].includes(term)))score+=40;
+if(item.key==="warranty"&&terms.some(term=>["무상","품질보증","보증기간","무상as","무상수리"].includes(term)))score+=35;
 return score;
 }
 function getSearchMatches(raw){
@@ -2048,6 +2053,13 @@ if(!matches.length){
 resultBox.innerHTML=`<div class="search-hint">일치하는 내용이 없습니다. 제품명이나 고객 표현을 다르게 입력해 주세요.</div>`;
 resultBox.classList.add("show");
 return;
+}
+window.currentManualSearchResults=matches;
+resultBox.innerHTML=matches.map((item,index)=>{
+const snippet=makeSearchSnippet(item.text,raw);
+return `<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||"")}</small><p>${escapeHtml(snippet)}</p></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`;
+}).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
+resultBox.classList.add("show");
 }
 window.currentManualSearchResults=matches;
 resultBox.innerHTML=matches.map((item,index)=>`<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
