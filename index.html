@@ -2061,10 +2061,6 @@ return `<button class="search-result-item" type="button" onclick="openIndexedSea
 }).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
 resultBox.classList.add("show");
 }
-window.currentManualSearchResults=matches;
-resultBox.innerHTML=matches.map((item,index)=>`<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
-resultBox.classList.add("show");
-}
 function makeSearchSnippet(text,raw){
 const clean=String(text||"").replace(/\s+/g," ").trim();
 const query=String(raw||"").trim();
