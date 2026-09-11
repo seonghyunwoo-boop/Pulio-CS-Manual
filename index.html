@@ -108,6 +108,7 @@ img{display:block;max-width:100%}
 .panel h3{font-size:17px;margin-bottom:16px}
 .update-list{list-style:none}
 .update-list li{display:grid;grid-template-columns:90px 1fr;gap:15px;padding:12px 0;border-bottom:1px solid #f0edf4;font-size:13px}
+.update-list li{cursor:pointer}.update-list li:hover .home-notice-title{color:var(--pulio)}.home-notice-title{display:flex;align-items:center;gap:8px}.notice-new{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;background:#f0eaff;color:var(--pulio);font-size:9px;font-style:normal;font-weight:800;line-height:1.6}.recent-notice .home-notice-title{font-weight:700}.home-notice-empty{display:block!important;color:var(--muted);cursor:default!important}  
 .notice-panel{background:linear-gradient(145deg,#f0eaff,#fbf9ff);border-color:#ddd1f5}
 .notice-panel i{font-size:24px;color:var(--pulio);margin-bottom:12px}
 .empty{display:none;padding:60px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:20px}
@@ -484,7 +485,7 @@ CS MANUAL
 
     <section class="tool-grid">
       <div class="panel">
-        <h3><i class="fa-solid fa-clock-rotate-left"></i> 최근 업데이트</h3>
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> 최근 공지사항</h3>
         <ul class="update-list" id="homeUpdateList"></ul>
       </div>
       <aside class="panel notice-panel">
@@ -1649,9 +1650,35 @@ function getMergedUpdates(){
   }).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
 }
 function renderHomeUpdates(){
-  const list=document.getElementById("homeUpdateList");if(!list)return;
-  const a=getMergedUpdates().slice(0,5);
-  list.innerHTML=a.map(x=>`<li><span>${escapeHtml((x.date||"").replaceAll("-","."))}</span><span>${escapeHtml(x.title||"")}</span></li>`).join("");
+  const list=document.getElementById("homeUpdateList");
+  if(!list)return;
+
+  const today=new Date();
+  today.setHours(0,0,0,0);
+
+  const notices=(window.portalData?.notices||[])
+    .map(x=>{
+      const date=new Date(`${x.date||""}T00:00:00`);
+      const days=Math.floor((today-date)/(1000*60*60*24));
+      return {...x,days};
+    })
+    .filter(x=>Number.isFinite(x.days)&&x.days>=0&&x.days<=10)
+    .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+
+  if(!notices.length){
+    list.innerHTML='<li class="home-notice-empty">최근 10일 이내 등록된 공지가 없습니다.</li>';
+    return;
+  }
+
+  list.innerHTML=notices.map(x=>`
+    <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
+      <span>${escapeHtml((x.date||"").replaceAll("-","."))}</span>
+      <span class="home-notice-title">
+        ${escapeHtml(x.title||x.name||"공지사항")}
+        ${x.days<=7?'<em class="notice-new">NEW</em>':''}
+      </span>
+    </li>
+  `).join("");
 }
 
 const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
