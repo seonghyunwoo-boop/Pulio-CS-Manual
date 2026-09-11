@@ -1704,8 +1704,6 @@ list.innerHTML=notices.map(x=>{
 }
 
 const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
-
-const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
 function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
 function renderFirebaseSection(key){const el=document.getElementById(`firebase-${key}`);if(!el)return;const section=document.getElementById(`firebase-section-${key}`);const state=portalLoadState[key]||'ready';if(state==='loading'||state==='error'){el.innerHTML='';section?.classList.add('hidden');return}let a=key==='updates'?getMergedUpdates():(portalData[key]||[]);
