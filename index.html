@@ -1681,10 +1681,29 @@ function renderHomeUpdates(){
     .filter(x=>Number.isFinite(x.days)&&x.days>=0&&x.days<=10)
     .sort((a,b)=>(b.noticeDate?.getTime()||0)-(a.noticeDate?.getTime()||0));
 
-  if(!notices.length){
-    list.innerHTML='<li class="home-notice-empty">최근 10일 이내 등록된 공지가 없습니다.</li>';
-    return;
-  }
+ if(!notices.length){
+  list.innerHTML='<li class="home-notice-empty">최근 10일 이내 등록된 공지가 없습니다.</li>';
+  return;
+}
+
+list.innerHTML=notices.map(x=>{
+  const dateText=x.noticeDate
+    ?`${x.noticeDate.getFullYear()}.${String(x.noticeDate.getMonth()+1).padStart(2,"0")}.${String(x.noticeDate.getDate()).padStart(2,"0")}`
+    :"";
+
+  return `
+    <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
+      <span>${escapeHtml(dateText)}</span>
+      <span class="home-notice-title">
+        ${escapeHtml(x.title||x.name||"공지사항")}
+        ${x.days<=7?'<em class="notice-new">NEW</em>':''}
+      </span>
+    </li>
+  `;
+}).join("");
+}
+
+const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
 
 const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
