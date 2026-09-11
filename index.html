@@ -832,7 +832,7 @@ operation:{
 notice:{
  title:"공지사항", subtitle:"긴급 공지와 중요 운영 변경 사항을 관리합니다.", icon:"fa-bell",
  content:`
-<section class="content-card"><h2>공지 검색</h2><p style="margin-bottom:14px;color:var(--muted);">공지 제목 또는 내용에 포함된 단어를 검색할 수 있습니다.</p><div style="position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8b8292;"></i><input id="noticeSearch" type="search" placeholder="공지 제목 또는 내용을 검색해 주세요." oninput="renderFirebaseSection('notices')" style="width:100%;height:50px;border:1px solid var(--line);border-radius:13px;padding:0 48px 0 44px;outline:none;background:#fff;font:inherit;"><button id="noticeSearchClear" type="button" onclick="document.getElementById('noticeSearch').value='';renderFirebaseSection('notices');document.getElementById('noticeSearch').focus();" aria-label="공지 검색어 지우기" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);border:0;background:none;color:#8b8292;cursor:pointer;font-size:16px;"><i class="fa-solid fa-xmark"></i></button></div><div id="noticeSearchStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-weight:600;"></div></section>
+<section class="content-card"><h2>공지 검색</h2><p style="margin-bottom:14px;color:var(--muted);">공지 제목 또는 내용에 포함된 단어를 검색할 수 있습니다.</p><div style="position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8b8292;"></i><input id="noticeSearch" type="search" placeholder="공지 제목 또는 내용을 검색해 주세요." oninput="window.noticePage=1;renderFirebaseSection('notices')" style="width:100%;height:50px;border:1px solid var(--line);border-radius:13px;padding:0 48px 0 44px;outline:none;background:#fff;font:inherit;"><button id="noticeSearchClear" type="button" onclick="document.getElementById('noticeSearch').value='';window.noticePage=1;renderFirebaseSection('notices');document.getElementById('noticeSearch').focus();" aria-label="공지 검색어 지우기" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);border:0;background:none;color:#8b8292;cursor:pointer;font-size:16px;"><i class="fa-solid fa-xmark"></i></button></div><div id="noticeSearchStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-weight:600;"></div></section>
 
 <section class="content-card"><h2>공지 등록 영역</h2><p>중요 공지와 적용 일자를 기록합니다.</p></section>
 `
@@ -1686,23 +1686,6 @@ function renderHomeUpdates(){
     return;
   }
 
-  list.innerHTML=notices.map(x=>{
-    const dateText=x.noticeDate
-      ?`${x.noticeDate.getFullYear()}.${String(x.noticeDate.getMonth()+1).padStart(2,"0")}.${String(x.noticeDate.getDate()).padStart(2,"0")}`
-      :"";
-
-    return `
-      <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
-        <span>${escapeHtml(dateText)}</span>
-        <span class="home-notice-title">
-          ${escapeHtml(x.title||x.name||"공지사항")}
-          ${x.days<=7?'<em class="notice-new">NEW</em>':''}
-        </span>
-      </li>
-    `;
-  }).join("");
-}
-
 const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
 function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
@@ -1730,15 +1713,74 @@ if(key==='notices'){
   }
 
   if(status){
-    if(!q){
-      status.textContent=`전체 공지 ${a.length}건`;
-    }else if(a.length){
-      status.textContent=`“${input.value.trim()}” 검색 결과 ${a.length}건`;
-    }else{
-      status.textContent=`“${input.value.trim()}” 검색 결과가 없습니다.`;
-    }
+    status.textContent=q
+      ?`“${input.value.trim()}” 검색 결과 ${a.length}건`
+      :`전체 공지 ${a.length}건`;
   }
-}if(!a.length){
+
+  if(!a.length){
+    section?.classList.remove('hidden');
+    el.innerHTML='<div class="portal-empty">등록된 공지가 없습니다.</div>';
+    return;
+  }
+
+  const pageSize=10;
+  const totalPages=Math.max(1,Math.ceil(a.length/pageSize));
+  window.noticePage=Math.min(Math.max(window.noticePage||1,1),totalPages);
+
+  const start=(window.noticePage-1)*pageSize;
+  const pageItems=a.slice(start,start+pageSize);
+
+  function noticeDate(x){
+    if(x.date)return String(x.date).replaceAll("-",".");
+    let d=null;
+    if(x.createdAt?.toDate)d=x.createdAt.toDate();
+    else if(x.createdAt?.seconds)d=new Date(x.createdAt.seconds*1000);
+    if(!d)return "-";
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+
+  const pageButtons=Array.from({length:totalPages},(_,i)=>i+1).map(n=>
+    `<button type="button" class="${n===window.noticePage?'active':''}" onclick="goNoticePage(${n})">${n}</button>`
+  ).join("");
+
+  el.innerHTML=`
+    <div class="table-wrap">
+      <table class="notice-table">
+        <thead>
+          <tr>
+            <th style="width:170px;">등록일</th>
+            <th>공지 내용</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${pageItems.map(x=>`
+            <tr>
+              <td>${escapeHtml(noticeDate(x))}</td>
+              <td>
+                <strong>${escapeHtml(x.title||x.name||"공지사항")}</strong>
+                ${x.content?`<p>${escapeHtml(x.content)}</p>`:''}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notice-pagination">
+      <button type="button" onclick="goNoticePage(1)" ${window.noticePage===1?'disabled':''}>« 맨앞</button>
+      <button type="button" onclick="goNoticePage(${window.noticePage-1})" ${window.noticePage===1?'disabled':''}>‹ 이전</button>
+      ${pageButtons}
+      <button type="button" onclick="goNoticePage(${window.noticePage+1})" ${window.noticePage===totalPages?'disabled':''}>다음 ›</button>
+      <button type="button" onclick="goNoticePage(${totalPages})" ${window.noticePage===totalPages?'disabled':''}>맨뒤 »</button>
+    </div>
+  `;
+
+  section?.classList.remove('hidden');
+  return;
+}
+                                    
+if(!a.length){
   if(key==='notices' && document.getElementById('noticeSearch')?.value.trim()){
     section?.classList.remove('hidden');
     el.innerHTML='<div class="portal-empty">검색 조건에 해당하는 공지가 없습니다.</div>';
@@ -1749,6 +1791,13 @@ if(key==='notices'){
   section?.classList.add('hidden');
   return;
 }section?.classList.remove('hidden');if(key==='faqs'){el.innerHTML=`<div class="faq-list">${a.map(x=>`<div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">${escapeHtml(x.question||'질문')}<i class="fa-solid fa-chevron-down"></i></button><div class="faq-answer">${escapeHtml(x.answer||'')}</div></div>`).join('')}</div>`;return}if(key==='responses'){el.innerHTML=a.map((x,i)=>`<div style="margin-bottom:16px"><h3>${escapeHtml(x.title||'답변 문구')}</h3><div class="copy-box" id="fb-copy-${i}">${escapeHtml(x.content||'')}<button class="copy-btn" onclick="copyText('fb-copy-${i}')"><i class="fa-regular fa-copy"></i></button></div></div>`).join('');return}if(key==='flows'){el.innerHTML=a.map((x,i)=>`<div style="margin-bottom:18px"><h3>${escapeHtml(x.title||'상담 FLOW')}</h3><div class="flow">${(x.steps||[]).map((s,n)=>`<div class="flow-step"><strong>${n+1}. ${escapeHtml(s.title||'확인')}</strong>${escapeHtml(s.description||'')}</div>`).join('')}</div>${x.response?`<div class="copy-box" id="flow-copy-${i}">${escapeHtml(x.response)}<button class="copy-btn" onclick="copyText('flow-copy-${i}')"><i class="fa-regular fa-copy"></i></button></div>`:''}</div>`).join('');return}el.innerHTML=`<div class="dynamic-grid">${a.map(x=>`<article class="dynamic-item"><h3>${escapeHtml(x.title||x.name||'항목')}</h3><p>${escapeHtml(x.content||x.summary||'')}</p><div class="dynamic-meta">${escapeHtml((x.date||'').replaceAll('-','.'))}${x.author?' · '+escapeHtml(x.author):''}</div><div class="dynamic-tags">${(x.tags||[]).map(t=>`<span>${escapeHtml(t)}</span>`).join('')}</div></article>`).join('')}</div>`}
+window.noticePage=1;
+
+window.goNoticePage=function(page){
+  window.noticePage=page;
+  renderFirebaseSection("notices");
+  document.getElementById("firebase-section-notices")?.scrollIntoView({behavior:"smooth",block:"start"});
+};
 function refreshPortal(){renderHomeUpdates();Object.keys(portalData).filter(k=>k!=='pages').forEach(renderFirebaseSection);}
 window.refreshPortal=refreshPortal;
 const diagnosticRules=[
@@ -1849,8 +1898,9 @@ function openPage(key){
   document.getElementById("pageSubtitle").textContent=p.subtitle;
   document.getElementById("pageIcon").className=`fa-solid ${p.icon}`;
   document.getElementById("pageContent").innerHTML=p.content+dynamicSection(key);
-  enhanceCopyAreas();
-  applyPortalEnhancements(key);
+enhanceCopyAreas();
+applyPortalEnhancements(key);
+if(key==="notice")renderFirebaseSection("notices");
   if(key==="response"){activeResponseCategory="전체";setTimeout(filterResponseTemplates,0);}
   document.querySelectorAll("#sidebarMenu button").forEach(btn=>btn.classList.toggle("active",btn.dataset.page===key));
   history.replaceState(null,"",`#${key}`);
@@ -2402,6 +2452,7 @@ setTimeout(()=>{if(typeof applyPortalEnhancements==='function'){const k=location
 </script>
 <style id="pulioV26Style">
 .response-usage-badge{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f4eff8;color:#6b438d;font-size:10px;font-weight:800;white-space:nowrap}.response-usage-badge.zero{display:none}.ctrl-k-hint{position:absolute;right:48px;top:50%;transform:translateY(-50%);font-size:10px;color:#8e8298;border:1px solid #e4ddeb;border-radius:6px;padding:2px 6px;background:#fff;pointer-events:none}.search-wrap,.search-container{position:relative}@media(max-width:640px){.ctrl-k-hint{display:none}.response-usage-badge{font-size:9px;padding:3px 6px}}
+.notice-table td strong{display:block;font-size:14px;color:var(--ink);margin-bottom:4px}.notice-table td p{margin:0;color:#655f6d;font-size:13px;white-space:pre-line}.notice-pagination{display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:wrap;margin-top:22px}.notice-pagination button{min-width:34px;height:34px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:#4f4657;font-size:12px;font-weight:700;cursor:pointer}.notice-pagination button:hover,.notice-pagination button.active{background:var(--pulio);border-color:var(--pulio);color:#fff}.notice-pagination button:disabled{opacity:.35;cursor:default;background:#f5f3f7;color:#999;border-color:var(--line)}
 </style><script id="pulioV26Script">
 (()=>{
 const USAGE_KEY='pulioResponseUsageV26';
