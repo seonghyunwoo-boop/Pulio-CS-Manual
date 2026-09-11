@@ -1660,17 +1660,48 @@ function renderHomeUpdates(){
 
   const notices=(window.portalData?.notices||[])
     .map(x=>{
-      const date=new Date(`${x.date||""}T00:00:00`);
-      const days=Math.floor((today-date)/(1000*60*60*24));
-      return {...x,days};
+      let noticeDate=null;
+
+      if(x.date){
+        noticeDate=new Date(`${x.date}T00:00:00`);
+      }else if(x.createdAt?.toDate){
+        noticeDate=x.createdAt.toDate();
+      }else if(x.createdAt?.seconds){
+        noticeDate=new Date(x.createdAt.seconds*1000);
+      }
+
+      if(noticeDate)noticeDate.setHours(0,0,0,0);
+
+      const days=noticeDate
+        ?Math.floor((today-noticeDate)/(1000*60*60*24))
+        :NaN;
+
+      return {...x,days,noticeDate};
     })
     .filter(x=>Number.isFinite(x.days)&&x.days>=0&&x.days<=10)
-    .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+    .sort((a,b)=>(b.noticeDate?.getTime()||0)-(a.noticeDate?.getTime()||0));
 
   if(!notices.length){
     list.innerHTML='<li class="home-notice-empty">최근 10일 이내 등록된 공지가 없습니다.</li>';
     return;
   }
+
+  list.innerHTML=notices.map(x=>{
+    const dateText=x.noticeDate
+      ?`${x.noticeDate.getFullYear()}.${String(x.noticeDate.getMonth()+1).padStart(2,"0")}.${String(x.noticeDate.getDate()).padStart(2,"0")}`
+      :"";
+
+    return `
+      <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
+        <span>${escapeHtml(dateText)}</span>
+        <span class="home-notice-title">
+          ${escapeHtml(x.title||x.name||"공지사항")}
+          ${x.days<=7?'<em class="notice-new">NEW</em>':''}
+        </span>
+      </li>
+    `;
+  }).join("");
+}
 
   list.innerHTML=notices.map(x=>`
     <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
