@@ -502,7 +502,6 @@ CS MANUAL
       <div class="sidebar-title">전체 업무 메뉴</div>
     </aside>
     <main>
-      <button class="back-home" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> 홈으로 돌아가기</button>
       <div class="breadcrumb">홈 · <span id="breadcrumbTitle"></span></div>
       <section class="page-hero">
         <div><h1 id="pageTitle"></h1><p id="pageSubtitle"></p></div>
@@ -1723,9 +1722,14 @@ function buildSidebar(){
     btn.onclick=()=>openPage(key);
     menu.appendChild(btn);
   });
+
+const homeBtn=document.createElement("button");
+  homeBtn.className="back-home";
+  homeBtn.innerHTML='<i class="fa-solid fa-arrow-left"></i> 홈으로 돌아가기';
+  homeBtn.onclick=showHome;
+  menu.appendChild(homeBtn);
 }
-
-
+  
 function renderEditableMenus(){
   const grid=document.querySelector('.category-grid');
   if(!grid)return;
