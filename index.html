@@ -1703,17 +1703,6 @@ function renderHomeUpdates(){
   }).join("");
 }
 
-  list.innerHTML=notices.map(x=>`
-    <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
-      <span>${escapeHtml((x.date||"").replaceAll("-","."))}</span>
-      <span class="home-notice-title">
-        ${escapeHtml(x.title||x.name||"공지사항")}
-        ${x.days<=7?'<em class="notice-new">NEW</em>':''}
-      </span>
-    </li>
-  `).join("");
-}
-
 const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
 function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
