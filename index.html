@@ -2016,12 +2016,30 @@ window.applyFirebasePages=function applyFirebasePages(items){
     const item=incoming[key];
     const savedPage={...(pages[key]||{}),title:item.title||key,subtitle:item.subtitle||'',icon:item.icon||'fa-file-lines',content:item.content||'',visible:item.visible!==false,keywords:item.keywords||''};
     // 이 파일에 포함된 기존 문구와 실무 보강 내용을 유지하고, 관리자 설정의 제목·아이콘·노출 여부만 반영합니다.
-    const enhanced=pulioEnhancedPageDefaults[key];
-    if(enhanced){
-      pages[key]={...savedPage,title:savedPage.title||enhanced.title,subtitle:enhanced.subtitle,icon:savedPage.icon||enhanced.icon,content:enhanced.content,visible:savedPage.visible!==false};
-    }else{
-      pages[key]=savedPage;
-    }
+const enhanced=pulioEnhancedPageDefaults[key];
+
+if(key==="promotion" && enhanced){
+  pages[key]={
+    ...savedPage,
+    title:enhanced.title,
+    subtitle:enhanced.subtitle,
+    icon:enhanced.icon,
+    content:enhanced.content,
+    visible:savedPage.visible!==false,
+    keywords:"웰워크 안마의자 상품정보 배송 설치 교환 반품"
+  };
+}else if(enhanced){
+  pages[key]={
+    ...savedPage,
+    title:savedPage.title||enhanced.title,
+    subtitle:enhanced.subtitle,
+    icon:savedPage.icon||enhanced.icon,
+    content:enhanced.content,
+    visible:savedPage.visible!==false
+  };
+}else{
+  pages[key]=savedPage;
+}
   });
   pageOrder=items.filter(x=>x.key&&x.visible!==false).sort((a,b)=>(a.order??999)-(b.order??999)).map(x=>x.key);
   renderEditableMenus();
