@@ -1865,6 +1865,25 @@ function getMergedUpdates(){
     seen.add(key);return true;
   }).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
 }
+  function getCachedHomeNotices(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("pulioHomeNoticesCache")||"[]");
+    return Array.isArray(saved)?saved:[];
+  }catch(error){
+    return [];
+  }
+}
+
+function saveCachedHomeNotices(items){
+  try{
+    localStorage.setItem("pulioHomeNoticesCache",JSON.stringify(items));
+  }catch(error){
+    console.warn("공지사항 저장 실패:",error);
+  }
+}
+
+window.saveCachedHomeNotices=saveCachedHomeNotices;
+  
 function renderHomeUpdates(){
   const list=document.getElementById("homeUpdateList");
   if(!list)return;
@@ -1872,7 +1891,12 @@ function renderHomeUpdates(){
   const today=new Date();
   today.setHours(0,0,0,0);
 
-  const notices=(window.portalData?.notices||[])
+  const noticeState=window.portalLoadState?.notices;
+  const noticeSource=noticeState==="ready"
+    ?(window.portalData?.notices||[])
+    :getCachedHomeNotices();
+
+  const notices=noticeSource
     .map(x=>{
       let noticeDate=null;
 
@@ -2514,6 +2538,7 @@ if(location.protocol==='file:'){
       let items=snapshot.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.visible!==false);
       items.sort((x,y)=>k==='updates'||k==='notices'?String(y.date||'').localeCompare(String(x.date||'')):(x.order??999)-(y.order??999));
       window.portalData[k].splice(0,window.portalData[k].length,...items);
+      if(k==='notices') window.saveCachedHomeNotices?.(items);
       if(k==='pages') window.applyFirebasePages?.(items);
       window.portalLoadState[k]='ready';
       status.textContent='전사 데이터 실시간 연결됨';
