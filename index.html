@@ -840,7 +840,7 @@ promotion:{
            <td>배송 완료 후 3~4 영입일 중으로 설치 관련 연락이 진행됩니다.</td>
          </tr>
          <tr>
-           <td>설치콜</td>
+           <td>해피콜</td>
            <td>주문 후 약 3~4영업일 소요됩니다.</td>
          </tr>
          <tr>
@@ -916,10 +916,10 @@ promotion:{
         고객 요청에 따라 방문 설치 교환으로 접수합니다.<br><br>
 
         <b>2. 설치 기사 방문</b><br>
-        접수 후 3~4일 내 설치 기사님이 방문합니다.<br><br>
+        접수 후 3~4일 내 해피콜 진행 후 일정 조율한 뒤 설치 기사님이 방문합니다.<br><br>
 
         <b>3. 제품 회수 및 교환</b><br>
-        기존 제품을 회수하고 교환 상품을 전달합니다.
+        기존 제품과 교환 제품은 택배로 회수, 배송진행하며 기사님 방문하여 설치 조립합니다.
       </div>
     </div>
 
@@ -1865,6 +1865,25 @@ function getMergedUpdates(){
     seen.add(key);return true;
   }).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
 }
+  function getCachedHomeNotices(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("pulioHomeNoticesCache")||"[]");
+    return Array.isArray(saved)?saved:[];
+  }catch(error){
+    return [];
+  }
+}
+
+function saveCachedHomeNotices(items){
+  try{
+    localStorage.setItem("pulioHomeNoticesCache",JSON.stringify(items));
+  }catch(error){
+    console.warn("공지사항 저장 실패:",error);
+  }
+}
+
+window.saveCachedHomeNotices=saveCachedHomeNotices;
+  
 function renderHomeUpdates(){
   const list=document.getElementById("homeUpdateList");
   if(!list)return;
@@ -1872,7 +1891,12 @@ function renderHomeUpdates(){
   const today=new Date();
   today.setHours(0,0,0,0);
 
-  const notices=(window.portalData?.notices||[])
+  const noticeState=window.portalLoadState?.notices;
+  const noticeSource=noticeState==="ready"
+    ?(window.portalData?.notices||[])
+    :getCachedHomeNotices();
+
+  const notices=noticeSource
     .map(x=>{
       let noticeDate=null;
 
@@ -2514,6 +2538,7 @@ if(location.protocol==='file:'){
       let items=snapshot.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.visible!==false);
       items.sort((x,y)=>k==='updates'||k==='notices'?String(y.date||'').localeCompare(String(x.date||'')):(x.order??999)-(y.order??999));
       window.portalData[k].splice(0,window.portalData[k].length,...items);
+      if(k==='notices') window.saveCachedHomeNotices?.(items);
       if(k==='pages') window.applyFirebasePages?.(items);
       window.portalLoadState[k]='ready';
       status.textContent='전사 데이터 실시간 연결됨';
