@@ -492,8 +492,6 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
     <span class="brand-sub">CS MANUAL</span>
   </div>
   <div class="header-actions">
-    <button id="mobileHomeBtn" class="mobile-home-btn" type="button" onclick="showHome()"><i class="fa-solid fa-house"></i><span>홈으로 가기</span></button>
-    <div class="header-actions">
 
     <div class="search-box header-search">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -504,25 +502,57 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
             placeholder="매뉴얼 검색"
         >
 
-        <button id="searchClear" class="search-clear" aria-label="검색어 지우기">
+        <button
+            id="searchClear"
+            class="search-clear"
+            aria-label="검색어 지우기"
+        >
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div id="searchResults" class="search-results" role="listbox" aria-label="검색 결과"></div>
+        <div
+            id="searchResults"
+            class="search-results"
+            role="listbox"
+            aria-label="검색 결과"
+        ></div>
     </div>
 
-    <button id="mobileHomeBtn" class="mobile-home-btn" type="button" onclick="showHome()"><i class="fa-solid fa-house"></i><span>홈으로 가기</span></button>
+    <button
+        id="mobileHomeBtn"
+        class="mobile-home-btn"
+        type="button"
+        onclick="showHome()"
+    >
+        <i class="fa-solid fa-house"></i>
+        <span>홈으로 가기</span>
+    </button>
 
     <button onclick="showUtility('notice')">
         <i class="fa-regular fa-bell"></i>
         <span>공지사항</span>
     </button>
-    <button onclick="showUtility('notice')"><i class="fa-regular fa-bell"></i><span>공지사항</span></button>
-     <!--<button onclick="showUtility('updates')"><i class="fa-solid fa-rotate"></i><span>업데이트</span></button>-->
-    <button onclick="showUtility('response')"><i class="fa-regular fa-copy"></i><span>답변 문구</span></button>
-    <button onclick="showUtility('faq')"><i class="fa-regular fa-circle-question"></i><span>FAQ</span></button>
-    <button class="admin-link" type="button" onclick="openAdminPanel()"><i class="fa-solid fa-lock"></i><span>관리자</span></button>
-  </div>
+
+    <button onclick="showUtility('response')">
+        <i class="fa-regular fa-copy"></i>
+        <span>답변 문구</span>
+    </button>
+
+    <button onclick="showUtility('faq')">
+        <i class="fa-regular fa-circle-question"></i>
+        <span>FAQ</span>
+    </button>
+
+    <button
+        class="admin-link"
+        type="button"
+        onclick="openAdminPanel()"
+    >
+        <i class="fa-solid fa-lock"></i>
+        <span>관리자</span>
+    </button>
+
+</div>
 </header>
 
 <section id="homeView">
@@ -2294,7 +2324,9 @@ if(key==="promotion" && enhanced){
 }else if(enhanced){
   pages[key]={
     ...savedPage,
-    title:key==="flow"?enhanced.title:(savedPage.title||enhanced.title),
+    title:(key==="flow" || key==="operation")
+  ? enhanced.title
+  : (savedPage.title || enhanced.title),
     subtitle:enhanced.subtitle,
     icon:savedPage.icon||enhanced.icon,
     content:enhanced.content,
@@ -2307,7 +2339,16 @@ if(key==="promotion" && enhanced){
   pageOrder=items.filter(x=>x.key&&x.visible!==false).sort((a,b)=>(a.order??999)-(b.order??999)).map(x=>x.key);
   renderEditableMenus();
   const current=location.hash.replace('#','');
-  if(current&&current!=='home'&&pages[current]&&pages[current].visible!==false&&!document.getElementById('detailView').classList.contains('hidden')) openPage(current);
+  if(
+  current &&
+  current !== "home" &&
+  current !== "operation" &&
+  pages[current] &&
+  pages[current].visible !== false &&
+  !document.getElementById("detailView").classList.contains("hidden")
+){
+  openPage(current);
+}
 }
 
 function showHome(){
@@ -2606,8 +2647,6 @@ return"매뉴얼";
 function buildSearchIndex(){
 const index=[];
 
-
-});
 Object.entries(pages).forEach(([key,page])=>{
 if(!page)return;
 const fullText=plainTextFromHtml(page.content||"");
