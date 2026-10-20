@@ -2277,7 +2277,7 @@ function renderEditableMenus(){
   const colors=['c9','c1','c8','c1','c2','c3','c6','c4','c5','c12','c10','c11'];
   grid.innerHTML=pageOrder.filter(key=>pages[key]&&pages[key].visible!==false).map((key,index)=>{
     const p=pages[key];
-    return `<article class="category-card" data-page="${escapeHtml(key)}" data-keywords="${escapeHtml((p.keywords||[]).join?p.keywords.join(' '):(p.keywords||''))}" onclick="openPage('${String(key).replaceAll("'","\\'")}')">
+    return `<article class="category-card" data-page="${escapeHtml(key)}" data-keywords="${escapeHtml((p.keywords||[]).join?(Array.isArray(p.keywords) ? p.keywords.join(' ') : String(p.keywords || '')):(p.keywords||''))}" onclick="openPage('${String(key).replaceAll("'","\\'")}')">
       <div class="card-top"><div class="icon ${colors[index%colors.length]}"><i class="fa-solid ${escapeHtml(p.icon||'fa-file-lines')}"></i></div><i class="fa-solid fa-chevron-right arrow"></i></div>
       <h3>${escapeHtml(p.title||key)}</h3><p>${escapeHtml(p.subtitle||'')}</p>
     </article>`;
