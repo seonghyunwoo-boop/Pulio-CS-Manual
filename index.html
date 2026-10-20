@@ -2389,13 +2389,41 @@ function searchCompanies(){
 
   const companies = window.portalData?.companies || [];
 
-  const results = companies.filter(company => {
+// 업체명 검색
+const filteredCompanies = companies.filter(company => {
 
-    const name = String(company.name || "").trim();
+  const name = String(company.name || "").trim();
 
-    return name.toLowerCase().includes(keyword);
+  return name.toLowerCase().includes(keyword);
 
-  });
+});
+
+// 중복 업체 제거
+const seenCompanies = new Set();
+
+const results = filteredCompanies.filter(company => {
+
+  const name = String(company.name || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+  const category = String(company.category || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+  const uniqueKey = name + "|" + category;
+
+  if (seenCompanies.has(uniqueKey)) {
+    return false;
+  }
+
+  seenCompanies.add(uniqueKey);
+
+  return true;
+
+});
 
   if(countBox){
     countBox.textContent = `검색 결과 ${results.length}건`;
