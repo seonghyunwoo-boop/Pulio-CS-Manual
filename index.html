@@ -2052,7 +2052,18 @@ list.innerHTML=notices.map(x=>{
 }).join("");
 }
 
-const portalData={pages:[],updates:[],notices:[],faqs:[],responses:[],products:[],flows:[]};window.portalData=portalData;
+const portalData={
+  pages:[],
+  updates:[],
+  notices:[],
+  faqs:[],
+  responses:[],
+  products:[],
+  flows:[],
+  companies:[]
+};
+
+window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
 function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
 function renderFirebaseSection(key){const el=document.getElementById(`firebase-${key}`);if(!el)return;const section=document.getElementById(`firebase-section-${key}`);const state=portalLoadState[key]||'ready';if(state==='loading'||state==='error'){el.innerHTML='';section?.classList.add('hidden');return}let a=key==='updates'?getMergedUpdates():(portalData[key]||[]);
@@ -2482,6 +2493,24 @@ return"매뉴얼";
 }
 function buildSearchIndex(){
 const index=[];
+  // 구글 시트 업체명 검색 데이터 추가
+(window.portalData?.companies || []).forEach(company => {
+
+  const name = String(company.name || "").trim();
+
+  if (!name) return;
+
+  index.push({
+    key: "company",
+    type: "업체",
+    title: name,
+    subtitle: "대량구매/외부몰 · " + (company.category || ""),
+    text: name,
+    target: "",
+    companyId: company.id || ""
+  });
+
+});
 Object.entries(pages).forEach(([key,page])=>{
 if(!page)return;
 const fullText=plainTextFromHtml(page.content||"");
@@ -2564,11 +2593,34 @@ function closeSearchResults(){
 resultBox?.classList.remove("show");
 }
 window.openIndexedSearchResult=function(index){
-const item=window.currentManualSearchResults?.[index];
-if(!item)return;
-openPage(item.key);
-closeSearchResults();
-setTimeout(()=>focusSearchTarget(item),180);
+
+  const item=window.currentManualSearchResults?.[index];
+
+  if(!item)return;
+
+  // 업체명 검색 결과
+  if(item.key==="company"){
+
+    closeSearchResults();
+
+    const companyName=item.title;
+    const companyCategory=item.subtitle;
+
+    alert(
+      "업체명: "+companyName+"\n"+
+      "구분: "+companyCategory
+    );
+
+    return;
+  }
+
+  // 기존 매뉴얼 검색 결과
+  openPage(item.key);
+
+  closeSearchResults();
+
+  setTimeout(()=>focusSearchTarget(item),180);
+
 };
 function focusSearchTarget(item){
 if(!item.target)return;
@@ -2645,6 +2697,41 @@ if(location.protocol==='file:'){
     ]);
     const firebaseConfig={apiKey:'AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8',authDomain:'pulio-cs-manual.firebaseapp.com',projectId:'pulio-cs-manual',storageBucket:'pulio-cs-manual.firebasestorage.app',messagingSenderId:'161974682041',appId:'1:161974682041:web:9b71f494beea785db7b668'};
     const db=getFirestore(initializeApp(firebaseConfig));
+    // 구글 시트 업체명 데이터 실시간 수신
+onSnapshot(
+  collection(db, "portal_companies"),
+
+  snapshot => {
+
+    const companies=snapshot.docs.map(doc => ({
+      id:doc.id,
+      ...doc.data()
+    }));
+
+    // 업체명 데이터 교체
+    window.portalData.companies=companies;
+
+    // 기존 검색 색인 초기화
+    // 다음 검색 실행 시 최신 업체명으로 다시 생성
+    if(typeof manualSearchIndex!=="undefined"){
+      manualSearchIndex=[];
+    }
+
+    // 검색창에 입력된 내용이 있다면 검색 결과 갱신
+    if(document.getElementById("manualSearch")?.value){
+      window.runSearch?.();
+    }
+
+    console.log("업체명 데이터 갱신:",companies.length);
+
+  },
+
+  error => {
+
+    console.error("업체명 데이터 연결 오류:",error);
+
+  }
+);
     Object.entries(map).forEach(([k,c])=>onSnapshot(collection(db,c),snapshot=>{
       let items=snapshot.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.visible!==false);
       items.sort((x,y)=>k==='updates'||k==='notices'?String(y.date||'').localeCompare(String(x.date||'')):(x.order??999)-(y.order??999));
