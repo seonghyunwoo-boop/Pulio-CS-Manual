@@ -475,6 +475,34 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
     }
 
 }
+  /* ==================================
+   FAQ 전체 숨김
+================================== */
+
+/* 상단 FAQ 메뉴 숨김 */
+.header-actions button[onclick="showUtility('faq')"] {
+    display: none !important;
+}
+
+/* FAQ 질문 및 답변 전체 숨김 */
+.faq-list,
+.faq-item,
+.faq-question,
+.faq-answer {
+    display: none !important;
+}
+
+/* 제품별 안내의 자주 묻는 질문 숨김 */
+.product-faq-block,
+.product-faq-title,
+.product-mini-faq {
+    display: none !important;
+}
+
+/* Firebase FAQ 영역 숨김 */
+#firebase-section-faqs {
+    display: none !important;
+}
 </style>
 
 <style id="pulioV25Styles">
