@@ -475,6 +475,34 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
     }
 
 }
+  /* ==================================
+   FAQ 전체 숨김
+================================== */
+
+/* 상단 FAQ 메뉴 숨김 */
+.header-actions button[onclick="showUtility('faq')"] {
+    display: none !important;
+}
+
+/* FAQ 질문 및 답변 전체 숨김 */
+.faq-list,
+.faq-item,
+.faq-question,
+.faq-answer {
+    display: none !important;
+}
+
+/* 제품별 안내의 자주 묻는 질문 숨김 */
+.product-faq-block,
+.product-faq-title,
+.product-mini-faq {
+    display: none !important;
+}
+
+/* Firebase FAQ 영역 숨김 */
+#firebase-section-faqs {
+    display: none !important;
+}
 </style>
 
 <style id="pulioV25Styles">
@@ -2557,8 +2585,6 @@ const relatedResponseMap={
   refund:[['반품 접수','반품 회수 접수'],['반품 배송비','단순 변심 배송비'],['반품 승인','입고 후 승인'],['환불 일정','결제수단별 환불 일정']],
   warranty:[['무상 보증 기본 안내','품질보증 기본 기준'],['보증기간 경과 유상','보증기간 경과 안내'],['구매정보 요청','구매 증빙 확인'],['검수 결과 안내','입고 검수 대기']],
   price:[['보증기간 경과 유상','유상 처리 가능성'],['정상 판정','왕복 배송비 안내'],['검수 결과 안내','최종 비용 산정 전 안내']],
-  promotion:[['배송 지연','배송 일정 확인'],['교환 접수','교환 진행 안내'],['반품 접수','반품 진행 안내'],['구매정보 요청','주문정보 확인']],
-  operation:[['구매정보 요청','판매처·주문정보 확인'],['내부 담당자 확인 중','예외 상황 이관'],['주문 정보 재확인','주문정보 불일치'],['사진 요청','오배송·구성품 확인']]
 };
 function responseLinkSection(key){
   const items=relatedResponseMap[key]; if(!items||!items.length)return '';
