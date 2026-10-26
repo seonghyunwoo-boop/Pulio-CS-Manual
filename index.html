@@ -3072,8 +3072,32 @@ document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target
 @media(max-width:900px){.v22-dashboard-grid{grid-template-columns:1fr}.v22-tool-dock{right:12px;bottom:12px}.v22-tool-btn{width:46px;height:46px}.v22-flow-grid{grid-template-columns:1fr}}@media(max-width:520px){.response-template-head{gap:6px}.response-badge{max-width:92px;overflow:hidden;text-overflow:ellipsis}.v22-response-star{width:28px;height:28px}.extension-head{display:block}.extension-head>div{width:100%}}
 </style>
 <div class="v22-tool-dock" aria-label="빠른 도구">
-  <button class="v22-tool-btn" title="즐겨찾기" onclick="v22OpenPanel('favorites')"><i class="fa-solid fa-star"></i></button>
-  <button class="v22-tool-btn" title="최근 복사" onclick="v22OpenPanel('recent')"><i class="fa-solid fa-clock-rotate-left"></i></button>
+
+  <button
+    class="v22-tool-btn v22-mobile-home"
+    type="button"
+    title="홈으로 가기"
+    aria-label="홈으로 가기"
+    onclick="showHome()">
+    <i class="fa-solid fa-house"></i>
+  </button>
+
+  <button
+    class="v22-tool-btn"
+    type="button"
+    title="즐겨찾기"
+    onclick="v22OpenPanel('favorites')">
+    <i class="fa-solid fa-star"></i>
+  </button>
+
+  <button
+    class="v22-tool-btn"
+    type="button"
+    title="최근 복사"
+    onclick="v22OpenPanel('recent')">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+  </button>
+
 </div>
 <aside id="v22Panel" class="v22-side-panel" aria-hidden="true">
   <div class="v22-panel-head"><h2 id="v22PanelTitle">빠른 도구</h2><button class="v22-close" onclick="v22ClosePanel()"><i class="fa-solid fa-xmark"></i></button></div>
