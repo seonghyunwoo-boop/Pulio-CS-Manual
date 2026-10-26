@@ -576,6 +576,183 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 .header-actions button[onclick="showUtility('response')"] {
     display: none !important;
 }
+  /* ===================================
+   업무별 담당자 안내
+=================================== */
+
+/* 메인 화면 담당자 안내 영역 */
+
+.manager-shortcut {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #ddd2ef;
+}
+
+.manager-shortcut h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4b1d91;
+  margin-bottom: 8px;
+}
+
+.manager-shortcut p {
+  font-size: 12px;
+  color: #655f6d;
+  margin-bottom: 12px;
+}
+
+/* 담당자 확인 버튼 */
+
+.manager-open-btn {
+  width: 100%;
+  padding: 11px 15px;
+  border: none;
+  border-radius: 10px;
+  background: #4b1d91;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.manager-open-btn:hover {
+  background: #7044dd;
+}
+
+/* 팝업 배경 */
+
+.manager-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 100000;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.manager-popup.open {
+  display: flex;
+}
+
+/* 팝업 본문 */
+
+.manager-popup-box {
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* 팝업 제목 */
+
+.manager-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.manager-popup-header h2 {
+  font-size: 20px;
+  color: #4b1d91;
+}
+
+.manager-close-btn {
+  border: none;
+  background: #f0eaff;
+  color: #4b1d91;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.manager-popup-desc {
+  font-size: 13px;
+  color: #77717f;
+  margin-bottom: 15px;
+}
+
+/* 담당자 검색창 */
+
+#managerSearch {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd2ef;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  outline: none;
+}
+
+#managerSearch:focus {
+  border-color: #7044dd;
+}
+
+/* 담당자 목록 */
+
+.manager-list {
+  display: grid;
+  gap: 12px;
+}
+
+.manager-item {
+  border: 1px solid #ebe7f1;
+  background: #faf8ff;
+  border-radius: 13px;
+  padding: 16px;
+}
+
+.manager-item h3 {
+  font-size: 15px;
+  color: #4b1d91;
+  margin-bottom: 9px;
+}
+
+.manager-item p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 3px;
+}
+
+.manager-empty {
+  text-align: center;
+  padding: 20px;
+  color: #77717f;
+  font-size: 13px;
+}
+
+/* 모바일 화면 */
+
+@media (max-width: 620px) {
+
+  .manager-popup {
+    padding: 12px;
+  }
+
+  .manager-popup-box {
+    padding: 18px;
+    max-height: 90vh;
+  }
+
+  .manager-popup-header h2 {
+    font-size: 17px;
+  }
+
+  .manager-item {
+    padding: 13px;
+  }
+
+}
 </style>
 
 <style id="pulioV25Styles">
@@ -772,11 +949,41 @@ CS MANUAL
         <h3><i class="fa-solid fa-clock-rotate-left"></i> 최근 공지사항</h3>
         <ul class="update-list" id="homeUpdateList"></ul>
       </div>
-      <aside class="panel notice-panel">
-        <i class="fa-solid fa-circle-info"></i>
-        <h3>매뉴얼 이용 원칙</h3>
-        <p>▪ 제품명, 판매처, 주문 상태, 구매일을 먼저 확인<br>▪ 확인되지 않은 내용은 단정 금지<br>▪ 정확한 정보 확인 후 처리 방향 안내</p>
-      </aside>
+<aside class="panel notice-panel">
+
+  <i class="fa-solid fa-circle-info"></i>
+
+  <h3>매뉴얼 이용 원칙</h3>
+
+  <p>
+    • 제품명, 판매처, 주문 상태, 구매일 확인<br>
+    • 불확실한 내용은 확인 후 안내
+  </p>
+
+  <div class="manager-shortcut">
+
+    <h4>
+      <i class="fa-solid fa-address-book"></i>
+      업무별 담당자 안내
+    </h4>
+
+    <p>
+      업무 관련 추가 확인이 필요한 경우
+      담당 부서 및 담당자 확인
+    </p>
+
+    <button
+      type="button"
+      onclick="openManagerPopup()"
+      class="manager-open-btn"
+    >
+      담당자 확인하기
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+
+  </div>
+
+</aside>
     </section>
   </main>
 </section>
@@ -796,7 +1003,93 @@ CS MANUAL
     </main>
   </div>
 </section>
+<!-- 업무별 담당자 안내 팝업 -->
 
+<div id="managerPopup" class="manager-popup">
+
+  <div class="manager-popup-box">
+
+    <div class="manager-popup-header">
+
+      <h2>
+        <i class="fa-solid fa-address-book"></i>
+        업무별 담당자 안내
+      </h2>
+
+      <button
+        type="button"
+        onclick="closeManagerPopup()"
+        class="manager-close-btn"
+        aria-label="닫기"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <p class="manager-popup-desc">
+      고객 문의 처리 중 추가 확인이 필요한 경우
+      해당 업무 담당자에게 문의
+    </p>
+
+    <input
+      type="search"
+      id="managerSearch"
+      placeholder="업무명, 담당 부서, 담당자 검색"
+      oninput="searchManagers()"
+    >
+
+    <div class="manager-list" id="managerList">
+
+      <div class="manager-item">
+        <h3>주문·결제</h3>
+        <p><strong>담당 부서 :</strong> 고객가치전략팀</p>
+        <p><strong>담당자 :</strong> 임송이</p>
+        <p><strong>문의 업무 :</strong> 주문 확인, 결제, 쿠폰</p>
+        <p><strong>문의 방법 :</strong> 사내 메신저</p>
+      </div>
+
+      <div class="manager-item">
+        <h3>배송·출고</h3>
+        <p><strong>담당 부서 :</strong> 고객가치전략팀</p>
+        <p><strong>담당자 :</strong> 임송이</p>
+        <p><strong>문의 업무 :</strong> 출고 일정, 송장, 배송 지연</p>
+        <p><strong>문의 방법 :</strong> 사내 메신저</p>
+      </div>
+
+      <div class="manager-item">
+        <h3>자사몰 반품</h3>
+        <p><strong>담당 부서 :</strong> SCM팀</p>
+        <p><strong>담당자 :</strong> 이서령</p>
+        <p><strong>문의 업무 :</strong> 회수, 검수, 교환 출고, 환불(계좌 환불 포함)</p>
+        <p><strong>문의 방법 :</strong> 사내 메신저</p>
+      </div>
+
+      <div class="manager-item">
+        <h3>제품 관련</h3>
+        <p><strong>담당 부서 :</strong> 고객가치전략팀</p>
+        <p><strong>담당자 :</strong> 임송이</p>
+        <p><strong>문의 업무 :</strong> 제품 사양, 작동 이상, 기능 확인</p>
+        <p><strong>문의 방법 :</strong> 사내 메신저</p>
+      </div>
+
+      <div class="manager-item">
+        <h3>프로모션·사은품</h3>
+        <p><strong>담당 부서 :</strong> 온라인마케팅팀</p>
+        <p><strong>담당자 :</strong> 담당자 입력</p>
+        <p><strong>문의 업무 :</strong> 행사 혜택, 쿠폰, 사은품</p>
+        <p><strong>문의 방법 :</strong> 사내 메신저</p>
+      </div>
+
+    </div>
+
+    <p id="managerEmpty" class="manager-empty" hidden>
+      검색 결과가 없습니다.
+    </p>
+
+  </div>
+
+</div>
 <footer class="footer">
   <div>기획 및 제작 | 성현우</div>
   <div>© 2026 Pulio. All Rights Reserved.</div>
@@ -3245,5 +3538,102 @@ function installCtrlK(){const input=document.getElementById('manualSearch');if(!
 const oldEnhance=window.v22ApplyEnhancements;if(typeof oldEnhance==='function'){window.v22ApplyEnhancements=function(key){const r=oldEnhance.apply(this,arguments);setTimeout(updateUsageBadges,20);return r}}
 installCtrlK();setTimeout(updateUsageBadges,100);
 })();
+<script>
+
+/* 업무별 담당자 팝업 열기 */
+
+function openManagerPopup() {
+
+  const popup = document.getElementById("managerPopup");
+
+  if (!popup) return;
+
+  popup.classList.add("open");
+
+  document.body.style.overflow = "hidden";
+
+  const search = document.getElementById("managerSearch");
+
+  if (search) {
+    search.value = "";
+    searchManagers();
+  }
+
+}
+
+/* 업무별 담당자 팝업 닫기 */
+
+function closeManagerPopup() {
+
+  const popup = document.getElementById("managerPopup");
+
+  if (!popup) return;
+
+  popup.classList.remove("open");
+
+  document.body.style.overflow = "";
+
+}
+
+/* 담당자 검색 */
+
+function searchManagers() {
+
+  const input = document.getElementById("managerSearch");
+
+  if (!input) return;
+
+  const keyword = input.value.trim().toLowerCase();
+
+  const items = document.querySelectorAll("#managerList .manager-item");
+
+  let visibleCount = 0;
+
+  items.forEach(function(item) {
+
+    const text = item.textContent.toLowerCase();
+
+    const matched = text.includes(keyword);
+
+    item.style.display = matched ? "" : "none";
+
+    if (matched) visibleCount++;
+
+  });
+
+  const empty = document.getElementById("managerEmpty");
+
+  if (empty) {
+    empty.hidden = visibleCount > 0;
+  }
+
+}
+
+/* 팝업 바깥 영역 클릭 시 닫기 */
+
+document.getElementById("managerPopup")?.addEventListener("click", function(event) {
+
+  if (event.target === this) {
+    closeManagerPopup();
+  }
+
+});
+
+/* ESC 키로 팝업 닫기 */
+
+document.addEventListener("keydown", function(event) {
+
+  if (event.key === "Escape") {
+
+    const popup = document.getElementById("managerPopup");
+
+    if (popup && popup.classList.contains("open")) {
+      closeManagerPopup();
+    }
+
+  }
+
+});
+
 </script></body>
 </html>
