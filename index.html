@@ -3141,9 +3141,56 @@ const title=(heading.textContent||"").replace(/\s+/g," ").trim();
 if(!title||title===page.title)return;
 const duplicate=index.some(item=>item.key===key&&normalize(item.title)===normalize(title));
 if(duplicate)return;
-index.push({key,type:resultTypeName(key,heading),title,subtitle:page.title||"",text:`${title} ${sectionText}`,target:title,targetIndex:headingIndex});
+index.push({
+  key,
+  type: resultTypeName(key, heading),
+  title,
+  subtitle: page.title || "",
+  text: `${title} ${sectionText}`,
+  target: title,
+  targetIndex: headingIndex
 });
+
+}); // 기존 제목 검색 종료
+
+
+/* =====================================
+   제품별 유상 비용 표 검색 추가
+===================================== */
+
+box.querySelectorAll("tr").forEach((row, rowIndex) => {
+
+  const cells = [...row.querySelectorAll("td")];
+
+  if (!cells.length) return;
+
+  const values = cells.map(cell =>
+    cell.textContent.replace(/\s+/g, " ").trim()
+  );
+
+  const rowText = values.join(" | ");
+
+  if (!rowText) return;
+
+  const title = values.length >= 2
+    ? `${values[0]} · ${values[1]}`
+    : values[0];
+
+  index.push({
+    key,
+    type: key === "price" ? "유상 비용" : "표 내용",
+    title,
+    subtitle: page.title || "",
+    text: rowText,
+    target: "",
+    searchType: "tableRow",
+    rowIndex
+  });
+
 });
+
+}); // 기존 페이지별 검색 종료
+
 return index;
 }
 let manualSearchIndex=[];
