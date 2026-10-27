@@ -2565,6 +2565,7 @@ function saveCachedHomeNotices(items){
 }
 
 window.saveCachedHomeNotices=saveCachedHomeNotices;
+window.getCachedHomeNotices=getCachedHomeNotices;
   
 function renderHomeUpdates(){
   const list=document.getElementById("homeUpdateList");
@@ -2660,7 +2661,46 @@ const portalData={
 window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
 function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
-function renderFirebaseSection(key){const el=document.getElementById(`firebase-${key}`);if(!el)return;const section=document.getElementById(`firebase-section-${key}`);const state=portalLoadState[key]||'ready';if(state==='loading'||state==='error'){el.innerHTML='';section?.classList.add('hidden');return}let a=key==='updates'?getMergedUpdates():(portalData[key]||[]);
+function renderFirebaseSection(key){const el=document.getElementById(`firebase-${key}`);if(!el)return;const section=document.getElementById(`firebase-section-${key}`);const state=portalLoadState[key]||'ready';
+
+// 공지사항은 Firebase 연결 전 캐시 데이터 우선 표시
+if(key==='notices'){
+
+  const liveNotices=portalData.notices||[];
+  const cachedNotices=getCachedHomeNotices();
+
+  // 최신 데이터 수신 전에는 기존 저장 데이터 사용
+  const noticeItems=state==='ready'
+    ?liveNotices
+    :cachedNotices;
+
+  // 표시할 데이터가 없고 연결 중인 경우
+  if(state==='loading' && !noticeItems.length){
+    section?.classList.remove('hidden');
+    el.innerHTML='<div class="portal-empty">공지사항 불러오는 중...</div>';
+    return;
+  }
+
+  // 연결 오류 시 캐시가 없는 경우
+  if(state==='error' && !noticeItems.length){
+    section?.classList.remove('hidden');
+    el.innerHTML='<div class="portal-empty">공지사항을 불러오지 못했습니다.</div>';
+    return;
+  }
+
+}else if(state==='loading'||state==='error'){
+  el.innerHTML='';
+  section?.classList.add('hidden');
+  return;
+}
+
+let a=key==='updates'
+  ?getMergedUpdates()
+  :key==='notices'
+    ?(state==='ready'
+        ?(portalData.notices||[])
+        :getCachedHomeNotices())
+    :(portalData[key]||[]);
 
 if(key==='notices'){
   const input=document.getElementById('noticeSearch');
@@ -3287,11 +3327,16 @@ function buildSearchIndex(){
           '[data-extension="related-responses"]'
         ).forEach(element=>element.remove());
 
-        const sectionText=(
-          sectionCopy.textContent||heading.textContent||""
-        ).replace(/\s+/g," ").trim();
+const sectionText=(
+  sectionCopy.textContent||heading.textContent||""
+).replace(/\s+/g," ").trim();
 
-        if(!title||title===page.title)return;
+// 검색 결과에 표시할 제목
+const title=(heading.textContent||"")
+  .replace(/\s+/g," ")
+  .trim();
+
+if(!title||title===page.title)return;
 
         const duplicate=index.some(item=>
           item.key===key &&
@@ -3975,13 +4020,31 @@ onSnapshot(
       window.refreshPortal?.();
       if(document.getElementById('manualSearch')?.value)window.runSearch?.();
       if(Object.values(window.portalLoadState).every(v=>v==='ready'))clearTimeout(timeout);
-    },error=>{
-      window.portalLoadState[k]='error';
-      status.textContent='실시간 연결 확인 필요 · 기존 내용 이용 가능';
-      err.style.display='block';
-      err.textContent='Firebase 연결 확인 필요: '+error.message;
-      window.refreshPortal?.();
-    }));
+},error=>{
+
+  window.portalLoadState[k]='error';
+
+  status.textContent='실시간 연결 확인 필요 · 기존 내용 이용 가능';
+
+  err.style.display='block';
+  err.textContent='Firebase 연결 확인 필요: '+error.message;
+
+  // 공지사항은 저장된 캐시 데이터로 표시
+  if(k==='notices'){
+    const cached=getCachedHomeNotices();
+
+    if(cached.length){
+      window.portalData.notices.splice(
+        0,
+        window.portalData.notices.length,
+        ...cached
+      );
+    }
+  }
+
+  window.refreshPortal?.();
+
+}));
   }catch(error){
     clearTimeout(timeout);
     markAll('error');
