@@ -2960,9 +2960,17 @@ function searchCompanies(){
 // 업체명 검색
 const filteredCompanies = companies.filter(company => {
 
-  const name = String(company.name || "").trim();
+  const name = String(
+    company.name ||
+    company.companyName ||
+    company.company ||
+    company["업체명"] ||
+    ""
+  )
+  .trim()
+  .toLowerCase();
 
-  return name.toLowerCase().includes(keyword);
+  return name.includes(keyword);
 
 });
 
@@ -3016,8 +3024,14 @@ const results = filteredCompanies.filter(company => {
     item.className = "dynamic-item";
     item.style.marginBottom = "10px";
 
-    const title = document.createElement("h3");
-    title.textContent = company.name;
+const title = document.createElement("h3");
+
+title.textContent =
+  company.name ||
+  company.companyName ||
+  company.company ||
+  company["업체명"] ||
+  "업체명 미등록";
 
     const category = document.createElement("p");
     category.textContent = `구분: ${company.category || ""}`;
@@ -3999,6 +4013,14 @@ onSnapshot(
     window.searchCompanies?.();
 
     console.log("판매처 데이터 갱신:", companies.length);
+
+console.table(
+  companies.map(company => ({
+    id: company.id,
+    name: company.name || company.companyName || company.company || company["업체명"] || "",
+    category: company.category || ""
+  }))
+);
 
   },
 
