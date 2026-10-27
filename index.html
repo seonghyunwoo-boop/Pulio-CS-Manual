@@ -3993,39 +3993,88 @@ if(location.protocol==='file:'){
     const firebaseConfig={apiKey:'AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8',authDomain:'pulio-cs-manual.firebaseapp.com',projectId:'pulio-cs-manual',storageBucket:'pulio-cs-manual.firebasestorage.app',messagingSenderId:'161974682041',appId:'1:161974682041:web:9b71f494beea785db7b668'};
     const db=getFirestore(initializeApp(firebaseConfig));
 // =====================================
-// 판매처 업체명 Firebase 실시간 수신
+// 판매처 검색 - 최적화 데이터 수신
 // =====================================
 
-collection(db, "portal_companies"),
+onSnapshot(
+  collection(db, "portal_company_search"),
 
   snapshot => {
 
-    const companies = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const companies = [];
 
-    // 업체명 데이터 갱신
-    window.portalData.companies = companies;
+    snapshot.docs.forEach(doc => {
 
-    // 판매처 검색 결과 자동 갱신
+      const data = doc.data();
+
+      if (!data.data) return;
+
+      try {
+
+        const chunk = JSON.parse(data.data);
+
+        if (Array.isArray(chunk)) {
+          companies.push(...chunk);
+        }
+
+      } catch (error) {
+
+        console.error(
+          "판매처 데이터 변환 오류:",
+          doc.id,
+          error
+        );
+
+      }
+
+    });
+
+    // 중복 업체 제거
+    const seen = new Set();
+
+    const uniqueCompanies = companies.filter(company => {
+
+      const name = String(company.name || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+      const category = String(company.category || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+      const key = name + "|" + category;
+
+      if (!name || seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+
+      return true;
+
+    });
+
+    // 판매처 검색 데이터 갱신
+    window.portalData.companies = uniqueCompanies;
+
+    // 검색 결과 자동 갱신
     window.searchCompanies?.();
 
-    console.log("판매처 데이터 갱신:", companies.length);
-
-console.table(
-  companies.map(company => ({
-    id: company.id,
-    name: company.name || company.companyName || company.company || company["업체명"] || "",
-    category: company.category || ""
-  }))
-);
+    console.log(
+      "최적화 판매처 데이터 갱신:",
+      uniqueCompanies.length
+    );
 
   },
 
   error => {
 
-    console.error("판매처 데이터 연결 오류:", error);
+    console.error(
+      "최적화 판매처 연결 오류:",
+      error
+    );
 
   }
 );
