@@ -242,8 +242,31 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 .search-result-text strong{display:block;font-size:15px;font-weight:700;line-height:1.45;letter-spacing:-0.2px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-result-type{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f0eaff;color:var(--pulio);font-size:10px;font-weight:800;}
 .search-hint{padding:14px 18px;background:#faf8fc;border-top:1px solid var(--line);font-size:15px;font-weight:600;line-height:1.5;letter-spacing:-0.3px;color:var(--ink);}                           
-.search-target-flash{animation:searchFlash 2.2s ease;}
-@keyframes searchFlash{0%,100%{background:transparent}20%,70%{background:#fff1a8}}
+/* 검색 결과 및 본문 음영 표시 */
+
+.search-highlight {
+  background: #e9e1f8;
+  color: #4b1d91;
+  border-radius: 4px;
+  padding: 1px 3px;
+  font-weight: 700;
+}
+
+/* 검색한 내용으로 이동했을 때 강조 */
+
+.search-target-flash {
+  animation: searchFlash 2.2s ease;
+}
+
+@keyframes searchFlash {
+  0%, 100% {
+    background: transparent;
+  }
+
+  20%, 70% {
+    background: #f0eaff;
+  }
+}
 .update-admin{display:grid;grid-template-columns:160px 1fr auto;gap:10px;align-items:end}
 .form-field label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:5px}
 .form-field input{
@@ -3159,18 +3182,104 @@ if(!manualSearchIndex.length)refreshManualSearchIndex();
 return manualSearchIndex.map(item=>({...item,score:scoreSearchItem(item,raw,terms)})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.title.localeCompare(b.title,"ko")).slice(0,15);
 }
 function renderSearchResults(matches,raw){
-if(!raw.trim()){closeSearchResults();return;}
-if(!matches.length){
-resultBox.innerHTML=`<div class="search-hint">일치하는 내용이 없습니다. 제품명이나 고객 표현을 다르게 입력해 필요</div>`;
-resultBox.classList.add("show");
-return;
+
+  if(!raw.trim()){
+    closeSearchResults();
+    return;
+  }
+
+  if(!matches.length){
+    resultBox.innerHTML =
+      `<div class="search-hint">
+        일치하는 내용이 없습니다.
+        다른 검색어를 입력해 주세요.
+      </div>`;
+
+    resultBox.classList.add("show");
+    return;
+  }
+
+  window.currentManualSearchResults = matches;
+
+  resultBox.innerHTML = matches.map((item,index)=>{
+
+    const snippet = makeSearchSnippet(item.text,raw);
+
+    const title = highlightSearchText(item.title,raw);
+    const description = highlightSearchText(snippet,raw);
+
+    return `
+      <button
+        class="search-result-item"
+        type="button"
+        onclick="openIndexedSearchResult(${index})"
+      >
+
+        <span class="search-result-icon">
+          <i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i>
+        </span>
+
+        <span class="search-result-text">
+
+          <strong>${title}</strong>
+
+          <small>${escapeHtml(item.subtitle||"")}</small>
+
+          <p>${description}</p>
+
+        </span>
+
+        <span class="search-result-type">
+          ${escapeHtml(item.type)}
+        </span>
+
+      </button>
+    `;
+
+  }).join("")+
+  `<div class="search-hint">
+    ${matches.length}개의 관련 내용을 찾았습니다.
+  </div>`;
+
+  resultBox.classList.add("show");
 }
-window.currentManualSearchResults=matches;
-resultBox.innerHTML=matches.map((item,index)=>{
-const snippet=makeSearchSnippet(item.text,raw);
-return `<button class="search-result-item" type="button" onclick="openIndexedSearchResult(${index})"><span class="search-result-icon"><i class="fa-solid ${pages[item.key]?.icon||"fa-magnifying-glass"}"></i></span><span class="search-result-text"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.subtitle||"")}</small><p>${escapeHtml(snippet)}</p></span><span class="search-result-type">${escapeHtml(item.type)}</span></button>`;
-}).join("")+`<div class="search-hint">${matches.length}개의 관련 내용을 찾았습니다.</div>`;
-resultBox.classList.add("show");
+  /* 검색 결과 일치 단어 음영 표시 */
+
+function highlightSearchText(text,query){
+
+  const original = String(text || "");
+  const keyword = String(query || "").trim();
+
+  if(!keyword){
+    return escapeHtml(original);
+  }
+
+  const lowerText = original.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
+
+  let result = "";
+  let position = 0;
+  let index;
+
+  while(
+    (index = lowerText.indexOf(lowerKeyword,position)) !== -1
+  ){
+
+    result += escapeHtml(
+      original.slice(position,index)
+    );
+
+    result +=
+      `<mark class="search-highlight">` +
+      escapeHtml(original.slice(index,index+keyword.length)) +
+      `</mark>`;
+
+    position = index + keyword.length;
+  }
+
+  result += escapeHtml(original.slice(position));
+
+  return result;
 }
 function makeSearchSnippet(text,raw){
 const clean=String(text||"").replace(/\s+/g," ").trim();
@@ -3212,22 +3321,153 @@ window.openIndexedSearchResult=function(index){
 
   closeSearchResults();
 
-  setTimeout(()=>focusSearchTarget(item),180);
+  setTimeout(()=>focusSearchTarget(item),300);
 
 };
+/* 검색 결과 클릭 시 해당 내용으로 이동 */
+
 function focusSearchTarget(item){
-if(!item.target)return;
-const root=document.getElementById("pageContent");
-if(!root)return;
-const targetText=normalize(item.target);
-const candidates=[...root.querySelectorAll("h2,h3,.product-item>summary strong,.response-template-head h3,.faq-question,.product-category-title h2,.flow-step strong")];
-const target=candidates.find(element=>normalize(element.textContent).includes(targetText));
-if(!target)return;
-const details=target.closest("details");
-if(details)details.open=true;
-target.scrollIntoView({behavior:"smooth",block:"center"});
-target.classList.add("search-target-flash");
-setTimeout(()=>target.classList.remove("search-target-flash"),2300);
+
+  const root = document.getElementById("pageContent");
+
+  if(!root) return;
+
+  const keyword = document
+    .getElementById("manualSearch")
+    .value.trim();
+
+  if(!keyword) return;
+
+  // 이전 검색 음영 제거
+  root.querySelectorAll(".search-highlight").forEach(mark=>{
+    mark.replaceWith(
+      document.createTextNode(mark.textContent)
+    );
+  });
+
+  root.normalize();
+
+  // 검색 결과의 제목을 기준으로 해당 영역 찾기
+  const headings = [
+    ...root.querySelectorAll(
+      "h2,h3,h4,.product-item>summary strong,.flow-step strong"
+    )
+  ];
+
+  let target = null;
+
+  if(item.target){
+
+    const targetText = normalize(item.target);
+
+    target = headings.find(el=>
+      normalize(el.textContent).includes(targetText)
+    );
+
+  }
+
+  // 제목을 찾지 못하면 실제 검색어가 포함된 요소 검색
+  if(!target){
+
+    const elements = [
+      ...root.querySelectorAll(
+        "h2,h3,h4,p,li,td,th,.check,.flow-step,.product-spec,.product-note,.copy-box"
+      )
+    ];
+
+    target = elements.find(el=>
+      el.textContent.toLowerCase().includes(
+        keyword.toLowerCase()
+      )
+    );
+
+  }
+
+  if(!target) return;
+
+  // 접혀 있는 상위 항목 자동 펼치기
+  let parent = target;
+
+  while(parent && parent !== root){
+
+    if(parent.tagName === "DETAILS"){
+      parent.open = true;
+    }
+
+    if(parent.classList.contains("faq-item")){
+      parent.classList.add("open");
+    }
+
+    parent = parent.parentElement;
+  }
+
+  // 검색어가 포함된 텍스트 노드 찾기
+  const walker = document.createTreeWalker(
+    target,
+    NodeFilter.SHOW_TEXT
+  );
+
+  const nodes = [];
+
+  while(walker.nextNode()){
+    nodes.push(walker.currentNode);
+  }
+
+  let firstMark = null;
+
+  nodes.forEach(node=>{
+
+    const text = node.nodeValue;
+
+    const index = text.toLowerCase().indexOf(
+      keyword.toLowerCase()
+    );
+
+    if(index < 0) return;
+
+    const before = document.createTextNode(
+      text.slice(0,index)
+    );
+
+    const mark = document.createElement("mark");
+
+    mark.className = "search-highlight";
+
+    mark.textContent = text.slice(
+      index,
+      index + keyword.length
+    );
+
+    const after = document.createTextNode(
+      text.slice(index + keyword.length)
+    );
+
+    node.replaceWith(before,mark,after);
+
+    if(!firstMark){
+      firstMark = mark;
+    }
+
+  });
+
+  // 검색된 내용으로 화면 이동
+  setTimeout(()=>{
+
+    const destination = firstMark || target;
+
+    destination.scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+
+    target.classList.add("search-target-flash");
+
+    setTimeout(()=>{
+      target.classList.remove("search-target-flash");
+    },2300);
+
+  },200);
+
 }
 window.runSearch=function(){
 const raw=search.value;
