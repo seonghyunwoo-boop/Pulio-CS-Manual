@@ -3243,43 +3243,86 @@ function renderSearchResults(matches,raw){
 
   resultBox.classList.add("show");
 }
-  /* 검색 결과 일치 단어 음영 표시 */
+/* 검색어 음영 표시 - 숫자 쉼표 무시 */
 
-function highlightSearchText(text,query){
+function highlightSearchText(text, query) {
+
+  const original = String(text || "");
+
+  const match = findSearchMatch(original, query);
+
+  if (!match) {
+    return escapeHtml(original);
+  }
+
+  const before = original.slice(0, match.index);
+
+  const matched = original.slice(
+    match.index,
+    match.index + match.length
+  );
+
+  const after = original.slice(
+    match.index + match.length
+  );
+
+  return (
+    escapeHtml(before) +
+    '<mark class="search-highlight">' +
+    escapeHtml(matched) +
+    '</mark>' +
+    escapeHtml(after)
+  );
+}
+  /* 숫자 검색 시 쉼표를 제외하고 비교 */
+
+function normalizeSearchNumber(text) {
+  return String(text || "").replace(/,/g, "");
+}
+
+/* 검색어와 일치하는 실제 문자 위치 찾기 */
+
+function findSearchMatch(text, query) {
 
   const original = String(text || "");
   const keyword = String(query || "").trim();
 
-  if(!keyword){
-    return escapeHtml(original);
+  if (!keyword) return null;
+
+  // 숫자 검색: 40000 → 40,000
+  const numberQuery = keyword.replace(/,/g, "");
+
+  if (/^\d+원?$/.test(numberQuery)) {
+
+    const digits = numberQuery.replace(/원$/, "");
+
+    const escapedDigits = digits
+      .split("")
+      .join(",?");
+
+    const regex = new RegExp(escapedDigits + "(?:원)?", "g");
+
+    const match = regex.exec(original);
+
+    if (match) {
+      return {
+        index: match.index,
+        length: match[0].length
+      };
+    }
   }
 
-  const lowerText = original.toLowerCase();
-  const lowerKeyword = keyword.toLowerCase();
+  // 일반 문자 검색
+  const index = original
+    .toLowerCase()
+    .indexOf(keyword.toLowerCase());
 
-  let result = "";
-  let position = 0;
-  let index;
+  if (index === -1) return null;
 
-  while(
-    (index = lowerText.indexOf(lowerKeyword,position)) !== -1
-  ){
-
-    result += escapeHtml(
-      original.slice(position,index)
-    );
-
-    result +=
-      `<mark class="search-highlight">` +
-      escapeHtml(original.slice(index,index+keyword.length)) +
-      `</mark>`;
-
-    position = index + keyword.length;
-  }
-
-  result += escapeHtml(original.slice(position));
-
-  return result;
+  return {
+    index,
+    length: keyword.length
+  };
 }
 function makeSearchSnippet(text,raw){
 const clean=String(text||"").replace(/\s+/g," ").trim();
