@@ -3048,6 +3048,13 @@ title.textContent =
 // Firebase에서 데이터가 변경되면 검색 결과 갱신
 window.searchCompanies = searchCompanies;
 function openPage(key){
+
+  // FAQ 및 답변 문구 페이지 접근 차단
+  if(key === "faq" || key === "response"){
+    showHome();
+    return;
+  }
+
   const p=pages[key];
   if(!p)return;
   document.body.classList.add("detail-mode");
