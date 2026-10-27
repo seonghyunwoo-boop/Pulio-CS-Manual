@@ -2960,9 +2960,17 @@ function searchCompanies(){
 // 업체명 검색
 const filteredCompanies = companies.filter(company => {
 
-  const name = String(company.name || "").trim();
+  const name = String(
+    company.name ||
+    company.companyName ||
+    company.company ||
+    company["업체명"] ||
+    ""
+  )
+  .trim()
+  .toLowerCase();
 
-  return name.toLowerCase().includes(keyword);
+  return name.includes(keyword);
 
 });
 
@@ -3016,8 +3024,14 @@ const results = filteredCompanies.filter(company => {
     item.className = "dynamic-item";
     item.style.marginBottom = "10px";
 
-    const title = document.createElement("h3");
-    title.textContent = company.name;
+const title = document.createElement("h3");
+
+title.textContent =
+  company.name ||
+  company.companyName ||
+  company.company ||
+  company["업체명"] ||
+  "업체명 미등록";
 
     const category = document.createElement("p");
     category.textContent = `구분: ${company.category || ""}`;
@@ -3034,6 +3048,13 @@ const results = filteredCompanies.filter(company => {
 // Firebase에서 데이터가 변경되면 검색 결과 갱신
 window.searchCompanies = searchCompanies;
 function openPage(key){
+
+  // FAQ 및 답변 문구 페이지 접근 차단
+  if(key === "faq" || key === "response"){
+    showHome();
+    return;
+  }
+
   const p=pages[key];
   if(!p)return;
   document.body.classList.add("detail-mode");
@@ -3979,32 +4000,88 @@ if(location.protocol==='file:'){
     const firebaseConfig={apiKey:'AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8',authDomain:'pulio-cs-manual.firebaseapp.com',projectId:'pulio-cs-manual',storageBucket:'pulio-cs-manual.firebasestorage.app',messagingSenderId:'161974682041',appId:'1:161974682041:web:9b71f494beea785db7b668'};
     const db=getFirestore(initializeApp(firebaseConfig));
 // =====================================
-// 판매처 업체명 Firebase 실시간 수신
+// 판매처 검색 - 최적화 데이터 수신
 // =====================================
 
 onSnapshot(
-  collection(db, "portal_companies"),
+  collection(db, "portal_company_search"),
 
   snapshot => {
 
-    const companies = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const companies = [];
 
-    // 업체명 데이터 갱신
-    window.portalData.companies = companies;
+    snapshot.docs.forEach(doc => {
 
-    // 판매처 검색 결과 자동 갱신
+      const data = doc.data();
+
+      if (!data.data) return;
+
+      try {
+
+        const chunk = JSON.parse(data.data);
+
+        if (Array.isArray(chunk)) {
+          companies.push(...chunk);
+        }
+
+      } catch (error) {
+
+        console.error(
+          "판매처 데이터 변환 오류:",
+          doc.id,
+          error
+        );
+
+      }
+
+    });
+
+    // 중복 업체 제거
+    const seen = new Set();
+
+    const uniqueCompanies = companies.filter(company => {
+
+      const name = String(company.name || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+      const category = String(company.category || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+      const key = name + "|" + category;
+
+      if (!name || seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+
+      return true;
+
+    });
+
+    // 판매처 검색 데이터 갱신
+    window.portalData.companies = uniqueCompanies;
+
+    // 검색 결과 자동 갱신
     window.searchCompanies?.();
 
-    console.log("판매처 데이터 갱신:", companies.length);
+    console.log(
+      "최적화 판매처 데이터 갱신:",
+      uniqueCompanies.length
+    );
 
   },
 
   error => {
 
-    console.error("판매처 데이터 연결 오류:", error);
+    console.error(
+      "최적화 판매처 연결 오류:",
+      error
+    );
 
   }
 );
