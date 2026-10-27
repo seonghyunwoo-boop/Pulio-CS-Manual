@@ -4043,29 +4043,39 @@ onSnapshot(
     // 중복 업체 제거
     const seen = new Set();
 
-    const uniqueCompanies = companies.filter(company => {
+const uniqueCompanies = companies.filter(company => {
 
-      const name = String(company.name || "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
+  const name = String(
+    company.name ||
+    company.companyName ||
+    company.company ||
+    company["업체명"] ||
+    ""
+  )
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
-      const category = String(company.category || "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
+  const category = String(
+    company.category ||
+    company["구분"] ||
+    ""
+  )
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
-      const key = name + "|" + category;
+  const key = name + "|" + category;
 
-      if (!name || seen.has(key)) {
-        return false;
-      }
+  if (!name || seen.has(key)) {
+    return false;
+  }
 
-      seen.add(key);
+  seen.add(key);
 
-      return true;
+  return true;
 
-    });
+});
 
     // 판매처 검색 데이터 갱신
     window.portalData.companies = uniqueCompanies;
