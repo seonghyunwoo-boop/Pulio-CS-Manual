@@ -3996,8 +3996,7 @@ if(location.protocol==='file:'){
 // 판매처 업체명 Firebase 실시간 수신
 // =====================================
 
-onSnapshot(
-  collection(db, "portal_company_search"),
+collection(db, "portal_companies"),
 
   snapshot => {
 
