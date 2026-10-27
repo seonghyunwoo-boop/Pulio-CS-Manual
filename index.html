@@ -3130,12 +3130,24 @@ function buildSearchIndex(){
 
   Object.entries(pages).forEach(([key,page])=>{
 
-    if(!page)return;
+    // FAQ 및 답변 문구 라이브러리 검색 제외
+    if(!page || key==="faq" || key==="response")return;
 
     const box=document.createElement("div");
     box.innerHTML=page.content||"";
 
-    const fullText=plainTextFromHtml(page.content||"");
+    // 검색용 복사본 생성
+    const searchBox=box.cloneNode(true);
+
+    // 제품별 FAQ 및 관련 답변 문구 제외
+    searchBox.querySelectorAll(
+      ".faq-list,.faq-item,.faq-question,.faq-answer,"+
+      ".product-faq-block,.product-mini-faq,"+
+      ".response-template,.response-category,"+
+      '[data-extension="related-responses"]'
+    ).forEach(element=>element.remove());
+
+    const fullText=plainTextFromHtml(searchBox.innerHTML);
 
     // 1. 기존 메뉴 검색
     index.push({
@@ -3174,8 +3186,6 @@ function buildSearchIndex(){
       "h2",
       "h3",
       ".product-item>summary strong",
-      ".response-template-head h3",
-      ".faq-question",
       ".product-category-title h2",
       ".flow-step strong"
     ];
@@ -3187,12 +3197,24 @@ function buildSearchIndex(){
           ".content-card,.product-item,.response-template,.faq-item,.flow-step,section,article,details"
         )||heading.parentElement;
 
-        const sectionText=(
-          container?.textContent||heading.textContent||""
-        ).replace(/\s+/g," ").trim();
+        // FAQ 및 답변 문구 영역의 제목 제외
+        if(heading.closest(
+          ".faq-list,.faq-item,.product-faq-block,.product-mini-faq,"+
+          ".response-template,.response-category"
+        ))return;
 
-        const title=(
-          heading.textContent||""
+        // 검색용으로 복사하여 제외 영역 제거
+        const sectionCopy=container.cloneNode(true);
+
+        sectionCopy.querySelectorAll(
+          ".faq-list,.faq-item,.faq-question,.faq-answer,"+
+          ".product-faq-block,.product-mini-faq,"+
+          ".response-template,.response-category,"+
+          '[data-extension="related-responses"]'
+        ).forEach(element=>element.remove());
+
+        const sectionText=(
+          sectionCopy.textContent||heading.textContent||""
         ).replace(/\s+/g," ").trim();
 
         if(!title||title===page.title)return;
@@ -3221,7 +3243,12 @@ function buildSearchIndex(){
 
     // 3. 표의 개별 행 검색
     box.querySelectorAll("tr").forEach((row,rowIndex)=>{
-
+      
+      // FAQ 및 답변 문구 영역의 표 제외
+      if(row.closest(
+        ".faq-list,.faq-item,.product-faq-block,.product-mini-faq,"+
+        ".response-template,.response-category"
+      ))return;
       const cells=Array.from(
         row.querySelectorAll("td")
       );
@@ -3262,12 +3289,18 @@ function buildSearchIndex(){
       ".flow-step",
       ".product-spec",
       ".product-note",
-      ".copy-box",
-      ".faq-answer"
+      ".copy-box"
     ];
 
     box.querySelectorAll(contentSelectors.join(","))
       .forEach(element=>{
+                // FAQ 및 답변 문구 관련 내용 제외
+        if(element.closest(
+          ".faq-list,.faq-item,.faq-question,.faq-answer,"+
+          ".product-faq-block,.product-mini-faq,"+
+          ".response-template,.response-category,"+
+          '[data-extension="related-responses"]'
+        ))return;
 
         // 표 내부 내용은 표 검색에서 처리
         if(element.closest("tr"))return;
@@ -3764,130 +3797,7 @@ function focusSearchTarget(item){
 
   },200);
 }
-  root.normalize();
 
-  // 검색 결과의 제목을 기준으로 해당 영역 찾기
-  const headings = [
-    ...root.querySelectorAll(
-      "h2,h3,h4,.product-item>summary strong,.flow-step strong"
-    )
-  ];
-
-  let target = null;
-
-  if(item.target){
-
-    const targetText = normalize(item.target);
-
-    target = headings.find(el=>
-      normalize(el.textContent).includes(targetText)
-    );
-
-  }
-
-  // 제목을 찾지 못하면 실제 검색어가 포함된 요소 검색
-  if(!target){
-
-    const elements = [
-      ...root.querySelectorAll(
-        "h2,h3,h4,p,li,td,th,.check,.flow-step,.product-spec,.product-note,.copy-box"
-      )
-    ];
-
-    target = elements.find(el=>
-      el.textContent.toLowerCase().includes(
-        keyword.toLowerCase()
-      )
-    );
-
-  }
-
-  if(!target) return;
-
-  // 접혀 있는 상위 항목 자동 펼치기
-  let parent = target;
-
-  while(parent && parent !== root){
-
-    if(parent.tagName === "DETAILS"){
-      parent.open = true;
-    }
-
-    if(parent.classList.contains("faq-item")){
-      parent.classList.add("open");
-    }
-
-    parent = parent.parentElement;
-  }
-
-  // 검색어가 포함된 텍스트 노드 찾기
-  const walker = document.createTreeWalker(
-    target,
-    NodeFilter.SHOW_TEXT
-  );
-
-  const nodes = [];
-
-  while(walker.nextNode()){
-    nodes.push(walker.currentNode);
-  }
-
-  let firstMark = null;
-
-  nodes.forEach(node=>{
-
-    const text = node.nodeValue;
-
-    const index = text.toLowerCase().indexOf(
-      keyword.toLowerCase()
-    );
-
-    if(index < 0) return;
-
-    const before = document.createTextNode(
-      text.slice(0,index)
-    );
-
-    const mark = document.createElement("mark");
-
-    mark.className = "search-highlight";
-
-    mark.textContent = text.slice(
-      index,
-      index + keyword.length
-    );
-
-    const after = document.createTextNode(
-      text.slice(index + keyword.length)
-    );
-
-    node.replaceWith(before,mark,after);
-
-    if(!firstMark){
-      firstMark = mark;
-    }
-
-  });
-
-  // 검색된 내용으로 화면 이동
-  setTimeout(()=>{
-
-    const destination = firstMark || target;
-
-    destination.scrollIntoView({
-      behavior:"smooth",
-      block:"center"
-    });
-
-    target.classList.add("search-target-flash");
-
-    setTimeout(()=>{
-      target.classList.remove("search-target-flash");
-    },2300);
-
-  },200);
-
-}
 window.runSearch=function(){
 const raw=search.value;
 clear.style.display=raw.trim()?"block":"none";
