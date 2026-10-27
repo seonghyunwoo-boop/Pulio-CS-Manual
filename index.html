@@ -3125,71 +3125,178 @@ if(element?.closest(".product-item"))return"제품";
 return"매뉴얼";
 }
 function buildSearchIndex(){
-const index=[];
 
-Object.entries(pages).forEach(([key,page])=>{
-if(!page)return;
-const fullText=plainTextFromHtml(page.content||"");
-index.push({key,type:"메뉴",title:page.title||key,subtitle:page.subtitle||"",text:`${page.title||""} ${page.subtitle||""} ${fullText}`,target:""});
-const box=document.createElement("div");
-box.innerHTML=page.content||"";
-const selectors=["h2","h3",".product-item>summary strong",".response-template-head h3",".faq-question",".product-category-title h2",".flow-step strong"];
-box.querySelectorAll(selectors.join(",")).forEach((heading,headingIndex)=>{
-const container=heading.closest(".content-card,.product-item,.response-template,.faq-item,.flow-step,section,article,details")||heading.parentElement;
-const sectionText=(container?.textContent||heading.textContent||"").replace(/\s+/g," ").trim();
-const title=(heading.textContent||"").replace(/\s+/g," ").trim();
-if(!title||title===page.title)return;
-const duplicate=index.some(item=>item.key===key&&normalize(item.title)===normalize(title));
-if(duplicate)return;
-index.push({
-  key,
-  type: resultTypeName(key, heading),
-  title,
-  subtitle: page.title || "",
-  text: `${title} ${sectionText}`,
-  target: title,
-  targetIndex: headingIndex
-});
+  const index=[];
 
-}); // 기존 제목 검색 종료
+  Object.entries(pages).forEach(([key,page])=>{
 
+    if(!page)return;
 
-/* =====================================
-   제품별 유상 비용 표 검색 추가
-===================================== */
+    const box=document.createElement("div");
+    box.innerHTML=page.content||"";
 
-box.querySelectorAll("tr").forEach((row, rowIndex) => {
+    const fullText=plainTextFromHtml(page.content||"");
 
-  const cells = [...row.querySelectorAll("td")];
+    // 1. 기존 메뉴 검색
+    index.push({
+      key,
+      type:"메뉴",
+      title:page.title||key,
+      subtitle:page.subtitle||"",
+      text:`${page.title||""} ${page.subtitle||""} ${fullText}`,
+      target:"",
+      searchType:"menu"
+    });
 
-  if (!cells.length) return;
+    // HTML 요소의 정확한 위치 저장
+    function getTargetPath(element){
 
-  const values = cells.map(cell =>
-    cell.textContent.replace(/\s+/g, " ").trim()
-  );
+      const path=[];
+      let node=element;
 
-  const rowText = values.join(" | ");
+      while(node && node!==box){
 
-  if (!rowText) return;
+        const parent=node.parentElement;
+        if(!parent)return null;
 
-  const title = values.length >= 2
-    ? `${values[0]} · ${values[1]}`
-    : values[0];
+        path.unshift(
+          Array.from(parent.children).indexOf(node)
+        );
 
-  index.push({
-    key,
-    type: key === "price" ? "유상 비용" : "표 내용",
-    title,
-    subtitle: page.title || "",
-    text: rowText,
-    target: "",
-    searchType: "tableRow",
-    rowIndex
+        node=parent;
+      }
+
+      return node===box?path:null;
+    }
+
+    // 2. 기존 제목 검색
+    const selectors=[
+      "h2",
+      "h3",
+      ".product-item>summary strong",
+      ".response-template-head h3",
+      ".faq-question",
+      ".product-category-title h2",
+      ".flow-step strong"
+    ];
+
+    box.querySelectorAll(selectors.join(","))
+      .forEach((heading,headingIndex)=>{
+
+        const container=heading.closest(
+          ".content-card,.product-item,.response-template,.faq-item,.flow-step,section,article,details"
+        )||heading.parentElement;
+
+        const sectionText=(
+          container?.textContent||heading.textContent||""
+        ).replace(/\s+/g," ").trim();
+
+        const title=(
+          heading.textContent||""
+        ).replace(/\s+/g," ").trim();
+
+        if(!title||title===page.title)return;
+
+        const duplicate=index.some(item=>
+          item.key===key &&
+          item.searchType==="heading" &&
+          normalize(item.title)===normalize(title)
+        );
+
+        if(duplicate)return;
+
+        index.push({
+          key,
+          type:resultTypeName(key,heading),
+          title,
+          subtitle:page.title||"",
+          text:`${title} ${sectionText}`,
+          target:title,
+          targetIndex:headingIndex,
+          targetPath:getTargetPath(heading),
+          searchType:"heading"
+        });
+
+      });
+
+    // 3. 표의 개별 행 검색
+    box.querySelectorAll("tr").forEach((row,rowIndex)=>{
+
+      const cells=Array.from(
+        row.querySelectorAll("td")
+      );
+
+      if(!cells.length)return;
+
+      const values=cells.map(cell=>
+        cell.textContent.replace(/\s+/g," ").trim()
+      );
+
+      const rowText=values.join(" | ");
+
+      if(!rowText)return;
+
+      const title=values.length>=2
+        ?`${values[0]} · ${values[1]}`
+        :values[0];
+
+      index.push({
+        key,
+        type:key==="price"?"유상 비용":"표 내용",
+        title,
+        subtitle:page.title||"",
+        text:rowText,
+        target:"",
+        searchType:"tableRow",
+        rowIndex,
+        targetPath:getTargetPath(row)
+      });
+
+    });
+
+    // 4. 일반 문장 및 안내 내용 검색
+    const contentSelectors=[
+      "p",
+      "li",
+      ".check",
+      ".flow-step",
+      ".product-spec",
+      ".product-note",
+      ".copy-box",
+      ".faq-answer"
+    ];
+
+    box.querySelectorAll(contentSelectors.join(","))
+      .forEach(element=>{
+
+        // 표 내부 내용은 표 검색에서 처리
+        if(element.closest("tr"))return;
+
+        // 중첩 요소의 중복 검색 방지
+        if(element.querySelector(contentSelectors.join(","))){
+          return;
+        }
+
+        const text=(element.textContent||"")
+          .replace(/\s+/g," ")
+          .trim();
+
+        if(!text||text.length<5)return;
+
+        index.push({
+          key,
+          type:"상세 내용",
+          title:page.title||key,
+          subtitle:"상세 내용",
+          text,
+          target:"",
+          searchType:"content",
+          targetPath:getTargetPath(element)
+        });
+
+      });
+
   });
-
-});
-
-}); // 기존 페이지별 검색 종료
 
 return index;
 }
@@ -3223,10 +3330,75 @@ if(item.key==="warranty"&&terms.some(term=>["무상","품질보증","보증기�
 return score;
 }
 function getSearchMatches(raw){
-const terms=expandedSearchTerms(raw);
-if(!terms.length)return[];
-if(!manualSearchIndex.length)refreshManualSearchIndex();
-return manualSearchIndex.map(item=>({...item,score:scoreSearchItem(item,raw,terms)})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.title.localeCompare(b.title,"ko")).slice(0,15);
+
+  const keyword=String(raw||"").trim();
+
+  if(!keyword)return[];
+
+  if(!manualSearchIndex.length){
+    refreshManualSearchIndex();
+  }
+
+  const terms=expandedSearchTerms(raw);
+
+  const numberKeyword=keyword.replace(/,/g,"");
+  const isNumberSearch=/^\d+원?$/.test(numberKeyword);
+
+  const results=manualSearchIndex
+    .map(item=>{
+
+      let score=scoreSearchItem(item,raw,terms);
+
+      const exactMatch=findSearchMatch(item.text,keyword);
+      const titleMatch=findSearchMatch(item.title,keyword);
+
+      if(isNumberSearch){
+
+        // 숫자 검색은 실제 숫자가 포함된 항목만 표시
+        if(!exactMatch&&!titleMatch)return null;
+
+        // 표의 개별 항목 우선
+        if(item.searchType==="tableRow"){
+          score+=200;
+        }
+
+        // 일반 문장 검색
+        if(item.searchType==="content"){
+          score+=150;
+        }
+
+      }else{
+
+        // 실제 검색어가 포함된 상세 내용 우선
+        if(exactMatch&&item.searchType==="content"){
+          score+=70;
+        }
+
+        if(exactMatch&&item.searchType==="tableRow"){
+          score+=70;
+        }
+
+        if(titleMatch&&item.searchType==="heading"){
+          score+=45;
+        }
+
+      }
+
+      // 메뉴 전체 내용이 상세 검색 결과보다 앞서지 않도록 조정
+      if(item.searchType==="menu"){
+        score-=35;
+      }
+
+      return {...item,score};
+
+    })
+    .filter(item=>item&&item.score>0)
+    .sort((a,b)=>
+      b.score-a.score||
+      a.title.localeCompare(b.title,"ko")
+    );
+
+  return results.slice(0,25);
 }
 function renderSearchResults(matches,raw){
 
@@ -3329,57 +3501,82 @@ function normalizeSearchNumber(text) {
 
 /* 검색어와 일치하는 실제 문자 위치 찾기 */
 
-function findSearchMatch(text, query) {
+function findSearchMatch(text, query){
 
-  const original = String(text || "");
-  const keyword = String(query || "").trim();
+  const original=String(text||"");
+  const keyword=String(query||"").trim();
 
-  if (!keyword) return null;
+  if(!keyword)return null;
 
-  // 숫자 검색: 40000 → 40,000
-  const numberQuery = keyword.replace(/,/g, "");
+  const numberQuery=keyword.replace(/,/g,"");
 
-  if (/^\d+원?$/.test(numberQuery)) {
+  if(/^\d+원?$/.test(numberQuery)){
 
-    const digits = numberQuery.replace(/원$/, "");
+    const digits=numberQuery.replace(/원$/,"");
 
-    const escapedDigits = digits
+    const pattern=digits
       .split("")
       .join(",?");
 
-    const regex = new RegExp(escapedDigits + "(?:원)?", "g");
+    const regex=new RegExp(
+      "(?<![0-9,])"+pattern+"(?:원)?(?![0-9,])",
+      "g"
+    );
 
-    const match = regex.exec(original);
+    const match=regex.exec(original);
 
-    if (match) {
+    if(match){
       return {
-        index: match.index,
-        length: match[0].length
+        index:match.index,
+        length:match[0].length
       };
     }
   }
 
-  // 일반 문자 검색
-  const index = original
-    .toLowerCase()
+  const index=original.toLowerCase()
     .indexOf(keyword.toLowerCase());
 
-  if (index === -1) return null;
+  if(index===-1)return null;
 
   return {
     index,
-    length: keyword.length
+    length:keyword.length
   };
 }
+  
 function makeSearchSnippet(text,raw){
-const clean=String(text||"").replace(/\s+/g," ").trim();
-const query=String(raw||"").trim();
-if(!query)return clean.slice(0,65);
-const position=clean.toLowerCase().indexOf(query.toLowerCase());
-if(position<0)return clean.slice(0,65);
-const start=Math.max(0,position-18);
-const end=Math.min(clean.length,position+query.length+42);
-return`${start>0?"…":""}${clean.slice(start,end)}${end<clean.length?"…":""}`;
+
+  const clean=String(text||"")
+    .replace(/\s+/g," ")
+    .trim();
+
+  const keyword=String(raw||"").trim();
+
+  if(!keyword){
+    return clean.slice(0,100);
+  }
+
+  const match=findSearchMatch(clean,keyword);
+
+  if(!match){
+    return clean.slice(0,100);
+  }
+
+  const start=Math.max(
+    0,
+    match.index-35
+  );
+
+  const end=Math.min(
+    clean.length,
+    match.index+match.length+65
+  );
+
+  return (
+    (start>0?"…":"")+
+    clean.slice(start,end)+
+    (end<clean.length?"…":"")
+  );
 }
 function closeSearchResults(){
 resultBox?.classList.remove("show");
@@ -3418,23 +3615,155 @@ window.openIndexedSearchResult=function(index){
 
 function focusSearchTarget(item){
 
-  const root = document.getElementById("pageContent");
+  const root=document.getElementById("pageContent");
 
-  if(!root) return;
+  if(!root)return;
 
-  const keyword = document
-    .getElementById("manualSearch")
-    .value.trim();
+  const searchInput=document.getElementById("manualSearch");
+  const keyword=searchInput?.value.trim()||"";
 
-  if(!keyword) return;
-
-  // 이전 검색 음영 제거
+  // 기존 음영 제거
   root.querySelectorAll(".search-highlight").forEach(mark=>{
     mark.replaceWith(
       document.createTextNode(mark.textContent)
     );
   });
 
+  root.normalize();
+
+  let target=null;
+
+  // 1. 검색 결과에 저장된 정확한 위치 확인
+  if(Array.isArray(item.targetPath)){
+
+    let node=root;
+
+    for(const index of item.targetPath){
+
+      node=node?.children[index];
+
+      if(!node)break;
+    }
+
+    if(node){
+      target=node;
+    }
+  }
+
+  // 2. 기존 제목 검색
+  if(!target&&item.target){
+
+    const targetText=normalize(item.target);
+
+    const headings=Array.from(
+      root.querySelectorAll(
+        "h2,h3,h4,.product-item>summary strong,.response-template-head h3,.faq-question,.flow-step strong"
+      )
+    );
+
+    target=headings.find(el=>
+      normalize(el.textContent).includes(targetText)
+    );
+  }
+
+  // 3. 검색어가 포함된 실제 내용 검색
+  if(!target&&keyword){
+
+    const elements=Array.from(
+      root.querySelectorAll(
+        "h2,h3,h4,p,li,td,th,.check,.flow-step,.product-spec,.product-note,.copy-box,.faq-answer"
+      )
+    );
+
+    target=elements.find(el=>
+      findSearchMatch(el.textContent,keyword)
+    );
+  }
+
+  if(!target)return;
+
+  // 접혀 있는 항목 자동 펼치기
+  let parent=target;
+
+  while(parent&&parent!==root){
+
+    if(parent.tagName==="DETAILS"){
+      parent.open=true;
+    }
+
+    if(parent.classList.contains("faq-item")){
+      parent.classList.add("open");
+    }
+
+    parent=parent.parentElement;
+  }
+
+  // 검색어에 음영 표시
+  const walker=document.createTreeWalker(
+    target,
+    NodeFilter.SHOW_TEXT
+  );
+
+  const nodes=[];
+
+  while(walker.nextNode()){
+    nodes.push(walker.currentNode);
+  }
+
+  let firstMark=null;
+
+  nodes.forEach(node=>{
+
+    if(!keyword)return;
+
+    const match=findSearchMatch(node.nodeValue,keyword);
+
+    if(!match)return;
+
+    const text=node.nodeValue;
+
+    const before=document.createTextNode(
+      text.slice(0,match.index)
+    );
+
+    const mark=document.createElement("mark");
+
+    mark.className="search-highlight";
+
+    mark.textContent=text.slice(
+      match.index,
+      match.index+match.length
+    );
+
+    const after=document.createTextNode(
+      text.slice(match.index+match.length)
+    );
+
+    node.replaceWith(before,mark,after);
+
+    if(!firstMark){
+      firstMark=mark;
+    }
+  });
+
+  // 해당 내용으로 화면 이동
+  setTimeout(()=>{
+
+    const destination=firstMark||target;
+
+    destination.scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+
+    target.classList.add("search-target-flash");
+
+    setTimeout(()=>{
+      target.classList.remove("search-target-flash");
+    },2200);
+
+  },200);
+}
   root.normalize();
 
   // 검색 결과의 제목을 기준으로 해당 영역 찾기
