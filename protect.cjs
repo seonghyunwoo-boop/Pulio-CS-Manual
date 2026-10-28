@@ -37,33 +37,27 @@ const { minify } = require('html-minifier-terser');
     caseSensitive: true,
     ignoreCustomFragments: [/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi]
   });
- fs.mkdirSync('protected', { recursive: true });
+// 배포 폴더 생성
+fs.mkdirSync('protected', { recursive: true });
+
+// 난독화된 HTML 저장
 fs.writeFileSync('protected/index.html', output, 'utf8');
 
-// 이미지, PDF 및 기타 정적 파일 복사
-const assetExtensions = /\.(png|jpg|jpeg|gif|webp|svg|ico|pdf|avif|woff|woff2)$/i;
+// 이미지 및 PDF 복사
+const files = fs.readdirSync('.');
 
-function copyAssets(sourceDir, targetDir) {
-  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
-    const sourcePath = path.join(sourceDir, entry.name);
-    const targetPath = path.join(targetDir, entry.name);
+for (const file of files) {
+  const fullPath = path.join('.', file);
 
-    if (entry.isDirectory()) {
-      if (['protected', 'node_modules', '.git', '.github', 'scripts'].includes(entry.name)) {
-        continue;
-      }
+  if (!fs.statSync(fullPath).isFile()) {
+    continue;
+  }
 
-      fs.mkdirSync(targetPath, { recursive: true });
-      copyAssets(sourcePath, targetPath);
-    } else if (entry.isFile() && assetExtensions.test(entry.name)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-      fs.copyFileSync(sourcePath, targetPath);
-      console.log(`Copied asset: ${sourcePath}`);
-    }
+  if (/\.(png|jpg|jpeg|gif|webp|svg|ico|pdf)$/i.test(file)) {
+    fs.copyFileSync(fullPath, path.join('protected', file));
+    console.log('Copied asset:', file);
   }
 }
-
-copyAssets('.', 'protected');
 
 console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
 })().catch(e => { console.error(e); process.exit(1); });
