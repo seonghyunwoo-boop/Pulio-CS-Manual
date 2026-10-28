@@ -37,7 +37,20 @@ const { minify } = require('html-minifier-terser');
     caseSensitive: true,
     ignoreCustomFragments: [/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi]
   });
-  fs.mkdirSync('protected', { recursive: true });
-  fs.writeFileSync('protected/index.html', output, 'utf8');
-  console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
+ fs.mkdirSync('protected', { recursive: true });
+fs.writeFileSync('protected/index.html', output, 'utf8');
+
+// 이미지 및 PDF 파일을 배포 폴더에 복사
+const assets = fs.readdirSync('.');
+
+for (const file of assets) {
+  if (!fs.statSync(file).isFile()) continue;
+
+  if (/\.(png|jpg|jpeg|gif|webp|svg|ico|pdf)$/i.test(file)) {
+    fs.copyFileSync(file, path.join('protected', file));
+    console.log(`Copied asset: ${file}`);
+  }
+}
+
+console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
 })().catch(e => { console.error(e); process.exit(1); });
