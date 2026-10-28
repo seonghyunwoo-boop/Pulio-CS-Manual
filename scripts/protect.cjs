@@ -39,5 +39,15 @@ const { minify } = require('html-minifier-terser');
   });
   fs.mkdirSync('protected', { recursive: true });
   fs.writeFileSync('protected/index.html', output, 'utf8');
+  // 배경 이미지 복사
+const backgroundImages = [
+  'PULIO_헐크2.png',
+  'PULIO_헐크2_mobile.png'
+];
+
+for (const file of backgroundImages) {
+  fs.copyFileSync(file, path.join('protected', file));
+  console.log('Background copied:', file);
+}
   console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
 })().catch(e => { console.error(e); process.exit(1); });
