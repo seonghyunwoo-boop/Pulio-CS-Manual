@@ -40,17 +40,30 @@ const { minify } = require('html-minifier-terser');
  fs.mkdirSync('protected', { recursive: true });
 fs.writeFileSync('protected/index.html', output, 'utf8');
 
-// 이미지 및 PDF 파일을 배포 폴더에 복사
-const assets = fs.readdirSync('.');
+// 이미지, PDF 및 기타 정적 파일 복사
+const assetExtensions = /\.(png|jpg|jpeg|gif|webp|svg|ico|pdf|avif|woff|woff2)$/i;
 
-for (const file of assets) {
-  if (!fs.statSync(file).isFile()) continue;
+function copyAssets(sourceDir, targetDir) {
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const targetPath = path.join(targetDir, entry.name);
 
-  if (/\.(png|jpg|jpeg|gif|webp|svg|ico|pdf)$/i.test(file)) {
-    fs.copyFileSync(file, path.join('protected', file));
-    console.log(`Copied asset: ${file}`);
+    if (entry.isDirectory()) {
+      if (['protected', 'node_modules', '.git', '.github', 'scripts'].includes(entry.name)) {
+        continue;
+      }
+
+      fs.mkdirSync(targetPath, { recursive: true });
+      copyAssets(sourcePath, targetPath);
+    } else if (entry.isFile() && assetExtensions.test(entry.name)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+      fs.copyFileSync(sourcePath, targetPath);
+      console.log(`Copied asset: ${sourcePath}`);
+    }
   }
 }
+
+copyAssets('.', 'protected');
 
 console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
 })().catch(e => { console.error(e); process.exit(1); });
