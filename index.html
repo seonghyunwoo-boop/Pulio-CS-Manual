@@ -371,6 +371,113 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 .product-download-actions{display:flex;align-items:center;gap:32px;flex-wrap:wrap}
 
 /* Single-file admin overlay */
+  /* ==================================
+   업무 시스템 바로가기
+================================== */
+
+.work-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #655f6d;
+}
+
+.work-links summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.work-links summary::-webkit-details-marker {
+  display: none;
+}
+
+.work-links summary:hover {
+  color: #4b1d91;
+}
+
+.work-links-arrow {
+  font-size: 10px;
+  transition: transform .2s;
+}
+
+.work-links[open] .work-links-arrow {
+  transform: rotate(180deg);
+}
+
+/* 펼쳐지는 메뉴 */
+
+.work-links-menu {
+  position: absolute;
+  top: calc(100% + 18px);
+  right: 0;
+  width: 205px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ebe7f1;
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(50,31,82,.15);
+  z-index: 9999;
+}
+
+/* 개별 바로가기 */
+
+.work-links-menu a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  color: #45394f;
+  text-decoration: none;
+  transition: .2s;
+}
+
+.work-links-menu a:hover {
+  background: #f0eaff;
+  color: #4b1d91;
+}
+
+.work-links-menu a i:first-child {
+  width: 20px;
+  text-align: center;
+  color: #7044dd;
+}
+
+.work-links-menu a i:last-child {
+  margin-left: auto;
+  font-size: 10px;
+  color: #a69bb2;
+}
+
+/* 모바일 */
+
+@media (max-width: 620px) {
+
+  .work-links {
+    font-size: 12px;
+  }
+
+  .work-links summary {
+    gap: 5px;
+  }
+
+  .work-links summary span {
+    display: none;
+  }
+
+  .work-links-menu {
+    right: -65px;
+    width: 190px;
+  }
+
+}
 .admin-link{font:inherit;cursor:pointer}
 #adminOverlay{position:fixed;inset:0;background:rgba(20,12,34,.72);z-index:99999;display:none;padding:18px}
 #adminOverlay.open{display:block}
@@ -828,7 +935,43 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
         <i class="fa-solid fa-house"></i>
         <span>홈으로 가기</span>
     </button>
+<!-- 업무 시스템 바로가기 -->
+<details class="work-links">
+  <summary>
+    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    <span>업무 바로가기</span>
+    <i class="fa-solid fa-chevron-down work-links-arrow"></i>
+  </summary>
 
+  <div class="work-links-menu">
+
+    <a href="자사몰_URL" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-store"></i>
+      자사 쇼핑몰
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+    <a href="카페24_URL" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-desktop"></i>
+      카페24
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+    <a href="뱅크다_URL" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-building-columns"></i>
+      뱅크다
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+    <a href="이지어드민_URL" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      이지어드민
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+  </div>
+</details>
+    
     <button onclick="showUtility('notice')">
         <i class="fa-regular fa-bell"></i>
         <span>공지사항</span>
