@@ -1,0 +1,26 @@
+name: Test protected manual (no deployment)
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - 'index.html'
+      - 'scripts/protect.cjs'
+      - '.github/workflows/test-obfuscation.yml'
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install build tools
+        run: npm install --no-save javascript-obfuscator html-minifier-terser
+      - name: Build protected HTML
+        run: node scripts/protect.cjs
+      - name: Upload test output (does not change live website)
+        uses: actions/upload-artifact@v4
+        with:
+          name: protected-manual-test
+          path: protected/index.html
