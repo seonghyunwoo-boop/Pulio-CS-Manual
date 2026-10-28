@@ -5,26 +5,41 @@ const { minify } = require('html-minifier-terser');
 
 (async () => {
   const source = fs.readFileSync('index.html', 'utf8');
+
   let count = 0;
-  let output = source.replace(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi, (whole, attributes, code) => {
-    if (/\bsrc\s*=/.test(attributes) || /\btype\s*=\s*["']?module\b/i.test(attributes) || !code.trim()) return whole;
-    count++;
-    const result = JavaScriptObfuscator.obfuscate(code, {
-      compact: true,
-      renameGlobals: false,
-      renameProperties: false,
-      identifierNamesGenerator: 'hexadecimal',
-      stringArray: true,
-      stringArrayThreshold: 0.25,
-      stringArrayEncoding: ['base64'],
-      controlFlowFlattening: false,
-      deadCodeInjection: false,
-      debugProtection: false,
-      selfDefending: false,
-      sourceMap: false
-    }).getObfuscatedCode();
-    return `<script${attributes}>${result}</script>`;
-  });
+
+  let output = source.replace(
+    /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi,
+    (whole, attributes, code) => {
+      if (
+        /\bsrc\s*=/.test(attributes) ||
+        /\btype\s*=\s*["']?module\b/i.test(attributes) ||
+        !code.trim()
+      ) {
+        return whole;
+      }
+
+      count++;
+
+      const result = JavaScriptObfuscator.obfuscate(code, {
+        compact: true,
+        renameGlobals: false,
+        renameProperties: false,
+        identifierNamesGenerator: 'hexadecimal',
+        stringArray: true,
+        stringArrayThreshold: 0.25,
+        stringArrayEncoding: ['base64'],
+        controlFlowFlattening: false,
+        deadCodeInjection: false,
+        debugProtection: false,
+        selfDefending: false,
+        sourceMap: false
+      }).getObfuscatedCode();
+
+      return `<script${attributes}>${result}</script>`;
+    }
+  );
+
   output = await minify(output, {
     collapseWhitespace: true,
     conservativeCollapse: true,
@@ -35,29 +50,52 @@ const { minify } = require('html-minifier-terser');
     removeOptionalTags: false,
     keepClosingSlash: true,
     caseSensitive: true,
-    ignoreCustomFragments: [/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi]
+    ignoreCustomFragments: [
+      /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi
+    ]
   });
-// 배포 폴더 생성
-fs.mkdirSync('protected', { recursive: true });
 
-// 난독화된 HTML 저장
-fs.writeFileSync('protected/index.html', output, 'utf8');
+  // 배포 폴더 생성
+  fs.mkdirSync('protected', { recursive: true });
 
-// 이미지 및 PDF 복사
-const files = fs.readdirSync('.');
+  // 난독화된 HTML 저장
+  fs.writeFileSync('protected/index.html', output, 'utf8');
 
-for (const file of files) {
-  const fullPath = path.join('.', file);
+  // 이미지 및 PDF 복사
+  const assetExtensions = /\.(png|jpg|jpeg|gif|webp|svg|ico|pdf)$/i;
 
-  if (!fs.statSync(fullPath).isFile()) {
-    continue;
+  function copyAssets(sourceDir, targetDir) {
+    for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+      const sourcePath = path.join(sourceDir, entry.name);
+      const targetPath = path.join(targetDir, entry.name);
+
+      if (entry.isDirectory()) {
+        if (
+          ['protected', 'node_modules', '.git', '.github', 'scripts']
+            .includes(entry.name)
+        ) {
+          continue;
+        }
+
+        fs.mkdirSync(targetPath, { recursive: true });
+        copyAssets(sourcePath, targetPath);
+
+      } else if (entry.isFile() && assetExtensions.test(entry.name)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+        fs.copyFileSync(sourcePath, targetPath);
+
+        console.log('Copied asset:', sourcePath);
+      }
+    }
   }
 
-  if (/\.(png|jpg|jpeg|gif|webp|svg|ico|pdf)$/i.test(file)) {
-    fs.copyFileSync(fullPath, path.join('protected', file));
-    console.log('Copied asset:', file);
-  }
-}
+  copyAssets('.', 'protected');
 
-console.log(`Protected ${count} classic scripts. Output: protected/index.html`);
-})().catch(e => { console.error(e); process.exit(1); });
+  console.log(
+    `Protected ${count} classic scripts. Output: protected/index.html`
+  );
+
+})().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
