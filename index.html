@@ -2856,7 +2856,23 @@ const portalData={
 
 window.portalData=portalData;
 const portalLoadState={pages:'loading',updates:'loading',notices:'loading',faqs:'loading',responses:'loading',products:'loading',flows:'loading'};window.portalLoadState=portalLoadState;
-function dynamicSection(key){const map={updates:'updates',notice:'notices',faq:'faqs',response:'responses',product:'products',flow:'flows'};const type=map[key];return type?`<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`:''}
+function dynamicSection(key){
+  if(key === "faq") return "";
+
+  const map = {
+    updates: "updates",
+    notice: "notices",
+    response: "responses",
+    product: "products",
+    flow: "flows"
+  };
+
+  const type = map[key];
+
+  return type
+    ? `<section class="content-card dynamic-firebase-section hidden" id="firebase-section-${type}"><div id="firebase-${type}"></div></section>`
+    : "";
+}
 function renderFirebaseSection(key){const el=document.getElementById(`firebase-${key}`);if(!el)return;const section=document.getElementById(`firebase-section-${key}`);const state=portalLoadState[key]||'ready';
 
 // 공지사항은 Firebase 연결 전 캐시 데이터 우선 표시
