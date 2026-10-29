@@ -3882,8 +3882,11 @@ function renderExcelFaq() {
       return categoryMatch && searchMatch;
     });
 
-    list.replaceChildren();
-    count.textContent = `총 ${results.length}건`;
+ const previousHeight = list.offsetHeight;
+list.style.minHeight = `${previousHeight}px`;
+
+list.replaceChildren();
+count.textContent = `총 ${results.length}건`;
 
     if (!results.length) {
       const empty = document.createElement("p");
@@ -3905,6 +3908,10 @@ function renderExcelFaq() {
 
       details.append(summary, answer);
       list.appendChild(details);
+    });
+
+    requestAnimationFrame(() => {
+      list.style.minHeight = "";
     });
   }
 
