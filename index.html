@@ -3300,6 +3300,172 @@ title.textContent =
 
 // Firebase에서 데이터가 변경되면 검색 결과 갱신
 window.searchCompanies = searchCompanies;
+  /* ==========================================
+   엑셀 FAQ 데이터 및 검색 기능
+========================================== */
+
+const excelFaqData = [
+  {
+    category: "넥풀러AS",
+    question: "지압봉 결합하는 홈 불량여부 문의",
+    answer: "지압봉 결합 홈이 가로 방향으로 되어 있는 것이 정상이며, 다른 방향으로 되어 있는 경우 제품 이상으로 교환 필요."
+  },
+  {
+    category: "넥풀러AS",
+    question: "지압봉 구성",
+    answer: "1~4차: 라운드 지압봉 장착, ㄱ자 지압봉 및 승모 지압봉 동봉.\n1~5차: 승모 지압봉 장착, 라운드 지압봉 동봉.\n\n제품 구성품: 본체 1개, 어댑터, 리모컨, 지압봉 2개, 사용설명서, 품질보증서, 간편 설명서, 넥커버 2장, 본품 커버백."
+  },
+  {
+    category: "넥풀러AS",
+    question: "넥풀러 모드가 변경된걸까요?",
+    answer: "기존 250가지 모드에서 중복 모드를 제외하여 60가지로 변경.\n1~4차: 250가지 모드.\n1~5차 이후: 5가지 모드 × 4가지 세부 모드 × 강도 3단계로 구성. 리모컨도 해당 차수에 맞는 모드 적용."
+  },
+  {
+    category: "넥풀러AS",
+    question: "넥풀러 전원 켰을 때 기본 모드가 뭔가요?",
+    answer: "기존 기본 모드는 A6이며, 경추 지압과 경추 당김을 함께 제공하는 모드임. 1~5차 제품부터는 기본 모드를 A1로 변경하여 제작."
+  },
+    {
+    category: "넥풀러AS",
+    question: "리뉴얼 지압봉은 뭐가 다른건가요?",
+    answer: "승모근 부위에 더욱 강한 마사지감을 제공하고 정확한 위치를 자극할 수 있도록 지압봉 디자인 변경.\n\n교체 방법:\n1. 기존 지압봉을 잡고 앞으로 당겨 분리\n2. 가로 홈에 맞춰 교체할 지압봉 장착\n\n구성 차이:\n- 1~4차: 일자 지압봉 장착, ㄱ자 지압봉 및 신규 지압봉 동봉\n- 1~5차 이후: 승모 지압봉 장착, 일자 지압봉 동봉"
+  },
+  {
+    category: "넥풀러AS",
+    question: "넥풀러 사용하면 뒷목이랑 뒤통수가 저린 느낌인데 왜그런걸까요?",
+    answer: "마사지 과정에서 경추 주변 근육과 신경이 자극되어 저린 느낌이 발생할 가능성 있음.\n\n불편감 발생 시 사용을 중단하고 상태 확인 필요. 증상이 지속되거나 통증이 동반되는 경우 전문의 상담 권장.\n\n사용 시 어깨 아래에 접은 수건을 놓아 높이를 조절하는 방법 참고 가능."
+  },
+  {
+    category: "넥풀러AS",
+    question: "프리볼트 110V 해외 사용 가능한가요?",
+    answer: "넥풀러는 어댑터를 연결하여 사용하는 유선 제품임.\n\n제품 정격 출력: DC 12V 3A.\n\n해외 110V 환경에서는 어댑터 입력 전압이 100~240V를 지원하는지 확인 필요. 해당 조건을 충족하는 경우 국가별 콘센트 규격에 맞는 변환 플러그 사용 가능."
+  },
+  {
+    category: "넥풀러AS",
+    question: "수동모드의 숫자 0~9가 무슨의미 인가요?",
+    answer: "수동모드는 각 마사지 기능별 1~4단계 선택 가능.\n\n- 경추 지압(b): b1~b4\n- 경추 당김(t): t1~t4\n- 경추 마사지(p): p1~p4\n- 승모/당김(n): n1~n4\n\n표시되는 알파벳은 마사지 기능, 숫자는 해당 기능의 세부 모드를 의미."
+  },
+  {
+    category: "넥풀러AS",
+    question: "알파벳이 이상한데 불량인가요?",
+    answer: "경추 지압, 경추 견인, 경추 마사지, 승모 견인 버튼을 선택한 후 개별 동작을 실행하면 해당 기능을 나타내는 알파벳이 표시되는 방식임.\n\n정상적인 모드 표시이므로 알파벳이 나타나는 현상만으로는 제품 불량에 해당하지 않음."
+  },
+  {
+    category: "넥풀러AS",
+    question: "사람마다 목길이가 다른데 어떻게 사용하나요?",
+    answer: "넥풀러는 고정된 크기로 제작되어 제품 자체의 길이 조절은 불가.\n\n목 길이에 따른 마사지 모드가 구분되어 있으므로 사용자 체형과 마사지 체감에 맞는 모드 선택 권장."
+  }
+];
+
+function renderExcelFaq() {
+  const page = document.getElementById("pageContent");
+  if (!page) return;
+
+  // 중복 생성 방지
+  document.getElementById("excelFaqPanel")?.remove();
+
+  const panel = document.createElement("section");
+  panel.id = "excelFaqPanel";
+  panel.className = "content-card excel-faq-panel";
+
+  panel.innerHTML = `
+    <h2>제품별 고객 문의 FAQ</h2>
+
+    <input
+      type="search"
+      id="excelFaqSearch"
+      class="excel-faq-search"
+      placeholder="질문 또는 답변 내용 검색"
+    >
+
+    <div id="excelFaqCategories" class="excel-faq-categories"></div>
+
+    <div id="excelFaqCount" class="excel-faq-count"></div>
+
+    <div id="excelFaqList"></div>
+  `;
+
+  page.appendChild(panel);
+
+  const search = document.getElementById("excelFaqSearch");
+  const categories = document.getElementById("excelFaqCategories");
+  const list = document.getElementById("excelFaqList");
+  const count = document.getElementById("excelFaqCount");
+
+  let selectedCategory = "전체";
+
+  const categoryNames = [
+    "전체",
+    ...new Set(excelFaqData.map(item => item.category))
+  ];
+
+  categoryNames.forEach(category => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = category;
+
+    if (category === "전체") {
+      button.classList.add("active");
+    }
+
+    button.addEventListener("click", () => {
+      selectedCategory = category;
+
+      categories.querySelectorAll("button").forEach(btn => {
+        btn.classList.toggle("active", btn === button);
+      });
+
+      updateFaq();
+    });
+
+    categories.appendChild(button);
+  });
+
+  function updateFaq() {
+    const keyword = search.value.trim().toLowerCase();
+
+    const results = excelFaqData.filter(item => {
+      const categoryMatch =
+        selectedCategory === "전체" ||
+        item.category === selectedCategory;
+
+      const searchMatch =
+        item.question.toLowerCase().includes(keyword) ||
+        item.answer.toLowerCase().includes(keyword);
+
+      return categoryMatch && searchMatch;
+    });
+
+    list.replaceChildren();
+    count.textContent = `총 ${results.length}건`;
+
+    if (!results.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "검색 결과가 없습니다.";
+      list.appendChild(empty);
+      return;
+    }
+
+    results.forEach(item => {
+      const details = document.createElement("details");
+      details.className = "excel-faq-entry";
+
+      const summary = document.createElement("summary");
+      summary.textContent = item.question;
+
+      const answer = document.createElement("div");
+      answer.className = "excel-faq-answer";
+      answer.textContent = item.answer;
+
+      details.append(summary, answer);
+      list.appendChild(details);
+    });
+  }
+
+  search.addEventListener("input", updateFaq);
+
+  updateFaq();
+}
 function openPage(key){
 /* ==========================================
    제품별 공식몰 상세페이지 링크
