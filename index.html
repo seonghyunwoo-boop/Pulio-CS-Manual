@@ -2780,13 +2780,15 @@ if(x.date){
   return;
 }
 
-list.innerHTML=notices.map(x=>{
+window.homeNoticeItems=notices;
+
+list.innerHTML=notices.map((x,index)=>{
   const dateText=x.noticeDate
     ?`${x.noticeDate.getFullYear()}.${String(x.noticeDate.getMonth()+1).padStart(2,"0")}.${String(x.noticeDate.getDate()).padStart(2,"0")}`
     :"";
 
   return `
-    <li onclick="showUtility('notice')" class="${x.days<=7?'recent-notice':''}">
+    <li onclick="openHomeNotice(${index})" class="${x.days<=7?'recent-notice':''}">
       <span>${escapeHtml(dateText)}</span>
       <span class="home-notice-title">
         ${escapeHtml(x.title||x.name||"공지사항")}
@@ -2851,7 +2853,62 @@ let a=key==='updates'
         ?(portalData.notices||[])
         :getCachedHomeNotices())
     :(portalData[key]||[]);
+// 공지사항 최신 날짜순 정렬
+if(key==='notices'){
+  const getNoticeTime=(x)=>{
+    const raw=String(x.date||'').trim();
 
+    if(raw){
+      const normalized=raw.replace(/[./]/g,'-');
+      const time=new Date(normalized.replace(' ','T')).getTime();
+      if(Number.isFinite(time))return time;
+    }
+
+    if(x.createdAt?.toDate){
+      return x.createdAt.toDate().getTime();
+    }
+
+    if(x.createdAt?.seconds){
+      return x.createdAt.seconds*1000;
+    }
+
+    return 0;
+  };
+
+  a=[...a].sort((x,y)=>getNoticeTime(y)-getNoticeTime(x));
+}
+                                    // 홈에서 선택한 공지만 표시
+if(key==='notices' && window.selectedHomeNotice){
+  const selected=window.selectedHomeNotice;
+
+  const dateText=String(selected.date||'').replaceAll('-','.');
+
+  el.innerHTML=`
+    <div class="content-card">
+      <h2>${escapeHtml(selected.title||selected.name||'공지사항')}</h2>
+
+      <p style="font-size:12px;color:#77717f;margin-bottom:20px;">
+        등록일 ${escapeHtml(dateText)}
+      </p>
+
+      <div style="white-space:pre-line;line-height:1.8;font-size:14px;">
+        ${escapeHtml(selected.content||selected.summary||'')}
+      </div>
+
+      <button
+        type="button"
+        class="primary-btn"
+        style="margin-top:25px;"
+        onclick="window.selectedHomeNotice=null;renderFirebaseSection('notices')"
+      >
+        ← 공지사항 전체 목록
+      </button>
+    </div>
+  `;
+
+  section?.classList.remove('hidden');
+  return;
+}
 if(key==='notices'){
   const input=document.getElementById('noticeSearch');
   const status=document.getElementById('noticeSearchStatus');
@@ -3230,7 +3287,20 @@ if(key==="notice")renderFirebaseSection("notices");
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-function showUtility(key){openPage(key)}
+function showUtility(key){
+  window.selectedHomeNotice=null;
+  openPage(key);
+}
+
+function openHomeNotice(index){
+  const notice=window.homeNoticeItems?.[index];
+
+  if(!notice)return;
+
+  window.selectedHomeNotice=notice;
+
+  openPage('notice');
+}
 
 
 let activeResponseCategory='전체';
