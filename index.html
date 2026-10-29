@@ -856,7 +856,77 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 
 }
 </style>
+<style>
+/* 엑셀 FAQ 검색 및 목록 */
+.excel-faq-panel {
+  margin-top: 16px;
+}
 
+.excel-faq-search {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid #ded4e9;
+  border-radius: 12px;
+  margin: 12px 0 16px;
+  outline: none;
+}
+
+.excel-faq-search:focus {
+  border-color: #7044dd;
+}
+
+.excel-faq-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.excel-faq-categories button {
+  padding: 8px 12px;
+  border: 1px solid #e1d6ed;
+  border-radius: 20px;
+  background: #fff;
+  color: #61437b;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.excel-faq-categories button.active {
+  background: #4b1d91;
+  color: #fff;
+}
+
+.excel-faq-entry {
+  margin-bottom: 10px;
+  border: 1px solid #e9e2f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.excel-faq-entry summary {
+  padding: 15px 17px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.excel-faq-answer {
+  padding: 16px 18px;
+  border-top: 1px solid #f0eaf6;
+  background: #fdfbff;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.excel-faq-count {
+  font-size: 12px;
+  color: #85758f;
+  margin-bottom: 12px;
+}
+</style>
 <style id="pulioV25Styles">
 .search-intent-box{display:none;margin-top:12px;padding:13px 14px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);border-radius:15px;color:#fff}.search-intent-box.show{display:block}.search-intent-title{font-size:11px;font-weight:800;opacity:.88;margin-bottom:8px}.search-intent-chips{display:flex;flex-wrap:wrap;gap:7px}.search-intent-chip{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer}.search-intent-chip:hover{background:#fff;color:var(--pulio)}
 .product-checklist{margin-top:18px;padding:16px;border:1px solid #e9e0f2;border-radius:15px;background:#fbf9fd}.product-checklist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}.product-checklist-title{font-size:14px;font-weight:800;color:#5f3b79}.product-checklist-reset{border:0;background:transparent;color:#8d7a98;font-size:11px;cursor:pointer}.product-checklist-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.product-check-item{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;background:#fff;border:1px solid #eee8f3;border-radius:10px;font-size:12px;line-height:1.45;cursor:pointer}.product-check-item input{margin-top:2px;accent-color:var(--pulio)}.product-check-progress{font-size:11px;color:#8c7b95;margin-top:10px}.product-checklist.complete{border-color:#b8dfd1;background:#f5fcf9}.template-related{margin-top:11px;padding-top:10px;border-top:1px dashed #e8e0ee}.template-related-label{font-size:10px;font-weight:800;color:#8b7898;margin-bottom:7px}.template-related-links{display:flex;flex-wrap:wrap;gap:6px}.template-related-links button{border:1px solid #e4d9ed;background:#fff;color:#6b4684;border-radius:999px;padding:6px 9px;font-size:10px;cursor:pointer}.template-related-links button:hover{background:#f7f1fb}
@@ -3396,6 +3466,7 @@ if(key === "response"){
   document.getElementById("pageContent").innerHTML=p.content+dynamicSection(key);
 enhanceCopyAreas();
 applyPortalEnhancements(key);
+if(key==="faq")renderExcelFaq();
 if(key==="product")addProductDetailLinks();
 if(key==="notice")renderFirebaseSection("notices");
   if(key==="response"){activeResponseCategory="전체";setTimeout(filterResponseTemplates,0);}
