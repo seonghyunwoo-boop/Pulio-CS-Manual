@@ -3378,11 +3378,11 @@ function addProductDetailLinks() {
 
   });
 }
-  // FAQ 및 답변 문구 페이지 접근 차단
-  if(key === "faq" || key === "response"){
-    showHome();
-    return;
-  }
+// 답변 문구 페이지만 접근 차단
+if(key === "response"){
+  showHome();
+  return;
+}
 
   const p=pages[key];
   if(!p)return;
