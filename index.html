@@ -3259,7 +3259,153 @@ title.textContent =
 // Firebase에서 데이터가 변경되면 검색 결과 갱신
 window.searchCompanies = searchCompanies;
 function openPage(key){
+/* ==========================================
+   제품별 공식몰 상세페이지 링크
+   큰따옴표 안에 주소만 입력하면 됨
+========================================== */
 
+const productDetailLinks = {
+
+  // 종아리 마사지기
+  "P004": "",
+  "P004S": "",
+  "P004S-X": "",
+  "P004-CO": "",
+  "P005": "",
+  "P006": "",
+  "P006DP": "",
+
+  // 허벅지 마사지기
+  "PH001Z": "",
+  "PH001BKZ": "",
+  "PH002": "",
+  "PH002H": "",
+
+  // 마사지부츠
+  "PB001S": "",
+  "PB001WHS": "",
+  "PB001BKS": "",
+  "PB002": "",
+
+  // 목·어깨 및 머리
+  "N002T": "",
+  "N002R": "",
+  "N003": "",
+  "N003-CO": "",
+  "NP001": "",
+  "B002": "",
+  "TR001": "",
+  "ML001": "",
+  "E001": "",
+
+  // 손·손목
+  "H001": "",
+  "H002": "",
+  "H003": "",
+  "MS001": "",
+
+  // 등·허리·마사지 매트
+  "CH001": "",
+  "CH002": "",
+  "HL001": "",
+  "HL002": "",
+  "T002": "",
+  "T003": "",
+
+  // 마사지건·벨트
+  "MX001": "",
+  "MM001": "",
+  "MB001": "",
+
+  // 풋케어
+  "FG002": "",
+  "FG003": ""
+
+};
+
+
+/* 제품별 상세페이지 버튼 생성 */
+function addProductDetailLinks() {
+
+  document.querySelectorAll(
+    "#pageContent .product-item"
+  ).forEach(function(item) {
+
+    const summary = item.querySelector(":scope > summary");
+    const body = item.querySelector(":scope > .product-detail-body");
+
+    if (!summary || !body) return;
+
+    if (body.querySelector(".product-shop-links")) return;
+
+    const modelText =
+      summary.querySelector("span")?.textContent || "";
+
+    const matchedModels = Object.keys(productDetailLinks).filter(
+      function(code) {
+
+        const escaped = code.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        );
+
+        const pattern = new RegExp(
+          "(^|[^A-Za-z0-9-])" +
+          escaped +
+          "(?![A-Za-z0-9-])"
+        );
+
+        return pattern.test(modelText);
+      }
+    );
+
+    const availableModels = matchedModels.filter(
+      code => productDetailLinks[code].trim()
+    );
+
+    if (!availableModels.length) return;
+
+    const container = document.createElement("div");
+    container.className = "product-shop-links";
+
+    Object.assign(container.style, {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "10px",
+      marginBottom: "18px"
+    });
+
+    availableModels.forEach(function(model) {
+
+      const link = document.createElement("a");
+
+      link.href = productDetailLinks[model];
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      link.textContent =
+        "상품 상세페이지 (" + model + ") ↗";
+
+      Object.assign(link.style, {
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "12px 16px",
+        background: "#4b1d91",
+        color: "#ffffff",
+        borderRadius: "10px",
+        fontSize: "13px",
+        fontWeight: "700",
+        textDecoration: "none"
+      });
+
+      container.appendChild(link);
+    });
+
+    // 제품을 펼쳤을 때 설명 바로 위에 표시
+    body.prepend(container);
+
+  });
+}
   // FAQ 및 답변 문구 페이지 접근 차단
   if(key === "faq" || key === "response"){
     showHome();
@@ -3278,6 +3424,7 @@ function openPage(key){
   document.getElementById("pageContent").innerHTML=p.content+dynamicSection(key);
 enhanceCopyAreas();
 applyPortalEnhancements(key);
+if(key==="product")addProductDetailLinks();
 if(key==="notice")renderFirebaseSection("notices");
   if(key==="response"){activeResponseCategory="전체";setTimeout(filterResponseTemplates,0);}
   document.querySelectorAll("#sidebarMenu button").forEach(btn=>btn.classList.toggle("active",btn.dataset.page===key));
