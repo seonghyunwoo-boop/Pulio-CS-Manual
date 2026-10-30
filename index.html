@@ -3197,7 +3197,7 @@ function showHome(){
   closeSearchResults();
   history.replaceState(null,"","#home");
   renderHomeUpdates();
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo({top:0,behavior:"instant"});
 }
 // =====================================
 // 판매처 확인 - 업체명 검색
@@ -4809,13 +4809,15 @@ window.openIndexedSearchResult=function(index){
     return;
   }
 
-  // 기존 매뉴얼 검색 결과
+   // 검색 결과에 해당하는 매뉴얼 열기
   openPage(item.key);
 
   closeSearchResults();
 
-  setTimeout(()=>focusSearchTarget(item),300);
-
+  // 페이지가 완전히 표시된 후 해당 위치로 이동
+  setTimeout(() => {
+    focusSearchTarget(item);
+  }, 500);
 };
 /* 검색 결과 클릭 시 해당 내용으로 이동 */
 
@@ -4839,19 +4841,30 @@ function focusSearchTarget(item){
 
   let target=null;
 
-  // 1. 검색 결과에 저장된 정확한 위치 확인
+   // 1. 검색 결과에 저장된 정확한 위치 확인
   if(Array.isArray(item.targetPath)){
 
     let node=root;
 
-    for(const index of item.targetPath){
+    // 즐겨찾기 버튼 등 추가된 요소를 제외하고 위치 확인
+    const originalChildren = Array.from(root.children).filter(
+      el => !el.classList.contains("v22-page-actions")
+    );
 
-      node=node?.children[index];
+    item.targetPath.forEach((index, depth) => {
 
-      if(!node)break;
-    }
+      if(!node) return;
 
-    if(node){
+      if(depth === 0){
+        node = originalChildren[index];
+      }else{
+        node = node.children[index];
+      }
+
+    });
+
+    // 저장된 위치에 실제 검색어가 포함되어 있는지 확인
+    if(node && keyword && findSearchMatch(node.textContent, keyword)){
       target=node;
     }
   }
