@@ -4093,7 +4093,10 @@ if(key==="notice")renderFirebaseSection("notices");
   history.replaceState(null,"",`#${key}`);
   
   closeSearchResults();
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo({
+  top:0,
+  behavior:"instant"
+});
 }
 
 function showUtility(key){
@@ -4329,25 +4332,36 @@ function buildSearchIndex(){
     });
 
     // HTML 요소의 정확한 위치 저장
-    function getTargetPath(element){
+function getTargetPath(element){
 
-      const path=[];
-      let node=element;
+  if(!element || !box.contains(element)){
+    return null;
+  }
 
-      while(node && node!==box){
+  const path=[];
+  let node=element;
 
-        const parent=node.parentElement;
-        if(!parent)return null;
+  while(node && node!==box){
 
-        path.unshift(
-          Array.from(parent.children).indexOf(node)
-        );
+    const parent=node.parentElement;
 
-        node=parent;
-      }
-
-      return node===box?path:null;
+    if(!parent){
+      return null;
     }
+
+    const index=Array.from(parent.children).indexOf(node);
+
+    if(index<0){
+      return null;
+    }
+
+    path.unshift(index);
+
+    node=parent;
+  }
+
+  return node===box?path:null;
+}
 
     // 2. 기존 제목 검색
     const selectors=[
@@ -4619,12 +4633,33 @@ function getSearchMatches(raw){
     );
   });
 
-  // 정확한 검색 결과가 있으면 유사 검색 결과 제외
-  if(exactResults.length > 0){
-    return exactResults.slice(0,25);
+  // 실제 검색어가 포함된 결과 우선
+  const directResults=results.filter(item=>
+    findSearchMatch(item.title,keyword) ||
+    findSearchMatch(item.text,keyword)
+  );
+
+  // 정확한 검색 결과가 존재하면 해당 결과만 표시
+  if(directResults.length){
+
+    return directResults
+      .sort((a,b)=>{
+
+        // 제품명과 제목 검색 우선
+        const aTitle=findSearchMatch(a.title,keyword)?1:0;
+        const bTitle=findSearchMatch(b.title,keyword)?1:0;
+
+        if(aTitle!==bTitle){
+          return bTitle-aTitle;
+        }
+
+        return b.score-a.score;
+
+      })
+      .slice(0,25);
   }
 
-  // 정확한 결과가 없을 때만 기존 유사어 검색 적용
+  // 직접 일치하는 내용이 없을 때만 유사 검색
   return results.slice(0,25);
 }
 function renderSearchResults(matches,raw){
@@ -4838,214 +4873,356 @@ window.openIndexedSearchResult=function(index){
 
   const item=window.currentManualSearchResults?.[index];
 
-  if(!item)return;
+  if(!item){
+    return;
+  }
 
-  // 업체명 검색 결과
+  // 업체명 검색 결과는 기존 기능 유지
   if(item.key==="company"){
 
     closeSearchResults();
 
-    const companyName=item.title;
-    const companyCategory=item.subtitle;
-
     alert(
-      "업체명: "+companyName+"\n"+
-      "구분: "+companyCategory
+      "업체명: "+item.title+"\n"+
+      "구분: "+item.subtitle
     );
 
     return;
   }
 
-   // 검색 결과에 해당하는 매뉴얼 열기
-  openPage(item.key);
+  // 검색 결과를 선택한 시점의 검색어 저장
+  const keyword=
+    document.getElementById("manualSearch")?.value.trim() || "";
 
+  // 선택한 검색 결과 정보 복사
+  const selectedItem={
+    ...item,
+    searchKeyword:keyword,
+    targetPath:Array.isArray(item.targetPath)
+      ? [...item.targetPath]
+      : null
+  };
+
+  // 검색 결과 창 닫기
   closeSearchResults();
 
-  // 페이지가 완전히 표시된 후 해당 위치로 이동
-  setTimeout(() => {
-    focusSearchTarget(item);
-  }, 500);
+  // 해당 매뉴얼 페이지 열기
+  openPage(selectedItem.key);
+
+  // 페이지 렌더링 이후 정확한 위치로 이동
+  requestAnimationFrame(()=>{
+
+    requestAnimationFrame(()=>{
+
+      focusSearchTarget(selectedItem);
+
+    });
+
+  });
+
 };
 /* 검색 결과 클릭 시 해당 내용으로 이동 */
 
 function focusSearchTarget(item){
 
-  const root = document.getElementById("pageContent");
+  const root=document.getElementById("pageContent");
 
-  if(!root) return;
+  if(!root || !item){
+    return;
+  }
 
-  const searchInput = document.getElementById("manualSearch");
-  const keyword = searchInput?.value.trim() || "";
+  const keyword=String(
+    item.searchKeyword ||
+    document.getElementById("manualSearch")?.value ||
+    ""
+  ).trim();
 
-  if(!keyword) return;
+  // 기존 검색 강조 제거
+  root.querySelectorAll("mark.search-highlight").forEach(mark=>{
 
-  // 기존 검색 음영 제거
-  root.querySelectorAll(".search-highlight").forEach(mark => {
     mark.replaceWith(
       document.createTextNode(mark.textContent)
     );
+
   });
 
-  let target = null;
+  root.normalize();
 
-  // 1. 저장된 검색 위치 확인
-  if(Array.isArray(item.targetPath)){
+  // 텍스트 비교용 정규화
+  const normalizeText=text=>
+    String(text||"")
+      .replace(/\s+/g," ")
+      .trim()
+      .toLowerCase();
 
-    let node = root;
+  // 검색 결과의 실제 내용
+  const expectedText=normalizeText(item.text);
 
-    for(const index of item.targetPath){
+  const expectedTitle=normalizeText(item.title);
 
-      if(!node) break;
+  let target=null;
 
-      node = node.children[index];
+  // 검색 인덱스에서 저장한 위치 복원
+  function resolveTargetPath(path){
+
+    if(!Array.isArray(path)){
+      return null;
     }
 
-    if(
-      node &&
-      findSearchMatch(node.textContent, keyword)
-    ){
-      target = node;
+    let node=root;
+
+    for(let depth=0;depth<path.length;depth++){
+
+      const index=path[depth];
+
+      if(!node){
+        return null;
+      }
+
+      let children=Array.from(node.children);
+
+      // 즐겨찾기 버튼 등 검색 인덱스에 없는 요소 제외
+      if(node===root){
+
+        children=children.filter(element=>
+          !element.classList.contains("v22-page-actions")
+        );
+
+      }
+
+      node=children[index]||null;
+    }
+
+    return node;
+  }
+
+  // 선택한 결과와 실제 요소가 일치하는지 확인
+  function isCorrectTarget(element){
+
+    if(!element){
+      return false;
+    }
+
+    const actualText=normalizeText(element.textContent);
+
+    switch(item.searchType){
+
+      case "heading":
+        return actualText===expectedTitle;
+
+      case "tableRow":{
+
+        if(element.tagName!=="TR"){
+          return false;
+        }
+
+        const cells=Array.from(
+          element.querySelectorAll("td")
+        );
+
+        const rowText=cells
+          .map(cell=>cell.textContent.replace(/\s+/g," ").trim())
+          .join(" | ");
+
+        return normalizeText(rowText)===expectedText;
+      }
+
+      case "content":
+        return actualText===expectedText;
+
+      case "menu":
+        return true;
+
+      default:
+        return false;
     }
   }
 
-  // 2. 저장된 위치가 다르면 실제 검색어로 다시 탐색
+  // 1. 저장된 정확한 위치 확인
+  const savedTarget=resolveTargetPath(item.targetPath);
+
+  if(isCorrectTarget(savedTarget)){
+    target=savedTarget;
+  }
+
+  // 2. 위치가 달라진 경우 정확한 내용으로 재탐색
   if(!target){
 
-    const selectors = [
-      "tr",
-      "h2",
-      "h3",
-      "h4",
-      "p",
-      "li",
-      "td",
-      "th",
-      ".check",
-      ".flow-step",
-      ".product-spec",
-      ".product-note",
-      ".copy-box",
-      ".product-item > summary",
-      ".product-category-summary"
-    ];
+    let candidates=[];
 
-    const elements = Array.from(
-      root.querySelectorAll(selectors.join(","))
-    );
+    switch(item.searchType){
 
-    // 검색 결과의 실제 내용과 일치하는 항목 우선
-    target = elements.find(el => {
+      case "heading":
 
-      const elementText = (el.textContent || "")
-        .replace(/\s+/g, " ")
-        .trim();
+        candidates=Array.from(
+          root.querySelectorAll(
+            "h2,h3,.product-item>summary strong,"+
+            ".product-category-title h2,.flow-step strong"
+          )
+        );
 
-      return (
-        item.text &&
-        elementText === item.text.trim() &&
-        findSearchMatch(elementText, keyword)
-      );
-    });
+        break;
 
-    // 정확히 같은 문장이 없으면 검색어로 탐색
+      case "tableRow":
+
+        candidates=Array.from(
+          root.querySelectorAll("tr")
+        );
+
+        break;
+
+      case "content":
+
+        candidates=Array.from(
+          root.querySelectorAll(
+            "p,li,.check,.flow-step,"+
+            ".product-spec,.product-note,.copy-box"
+          )
+        ).filter(element=>
+          !element.querySelector(
+            "p,li,.check,.flow-step,"+
+            ".product-spec,.product-note,.copy-box"
+          )
+        );
+
+        break;
+
+      case "menu":
+
+        target=root;
+
+        break;
+    }
+
+    // 선택한 결과와 정확하게 일치하는 요소만 허용
     if(!target){
 
-      target = elements.find(el =>
-        findSearchMatch(el.textContent, keyword)
-      );
+      target=candidates.find(element=>
+        isCorrectTarget(element)
+      )||null;
+
     }
   }
 
-  if(!target) return;
+  // 3. 다른 항목으로 임의 이동하지 않음
+  if(!target){
 
-  // 3. 접힌 제품 및 카테고리 자동 펼치기
-  let parent = target;
+    console.warn(
+      "검색 결과의 정확한 위치를 찾지 못했습니다.",
+      item
+    );
 
-  while(parent && parent !== root){
-
-    if(parent.tagName === "DETAILS"){
-      parent.open = true;
-    }
-
-    if(parent.classList.contains("faq-item")){
-      parent.classList.add("open");
-    }
-
-    parent = parent.parentElement;
+    return;
   }
 
-  // 4. 검색어 음영 표시
-  const walker = document.createTreeWalker(
-    target,
-    NodeFilter.SHOW_TEXT
-  );
+  // 4. 접힌 카테고리와 제품 펼치기
+  const detailsParents=[];
 
-  const nodes = [];
+  let parent=target;
 
-  while(walker.nextNode()){
-    nodes.push(walker.currentNode);
+  while(parent && parent!==root){
+
+    if(parent.tagName==="DETAILS"){
+      detailsParents.unshift(parent);
+    }
+
+    parent=parent.parentElement;
   }
 
-  let firstMark = null;
-
-  nodes.forEach(node => {
-
-    const match = findSearchMatch(
-      node.nodeValue,
-      keyword
-    );
-
-    if(!match) return;
-
-    const text = node.nodeValue;
-
-    const before = document.createTextNode(
-      text.slice(0, match.index)
-    );
-
-    const mark = document.createElement("mark");
-
-    mark.className = "search-highlight";
-
-    mark.textContent = text.slice(
-      match.index,
-      match.index + match.length
-    );
-
-    const after = document.createTextNode(
-      text.slice(match.index + match.length)
-    );
-
-    node.replaceWith(before, mark, after);
-
-    if(!firstMark){
-      firstMark = mark;
-    }
+  detailsParents.forEach(details=>{
+    details.open=true;
   });
 
-  // 5. 해당 위치로 이동
-  requestAnimationFrame(() => {
+  // 5. 선택한 내용에 검색어 음영 표시
+  let firstMark=null;
 
-    requestAnimationFrame(() => {
+  if(keyword){
 
-      const destination = firstMark || target;
+    const walker=document.createTreeWalker(
+      target,
+      NodeFilter.SHOW_TEXT
+    );
 
-      destination.scrollIntoView({
-        behavior: "instant",
-        block: "center"
-      });
+    const textNodes=[];
 
-      target.classList.add("search-target-flash");
+    while(walker.nextNode()){
 
-      setTimeout(() => {
-        target.classList.remove("search-target-flash");
-      }, 2200);
+      const node=walker.currentNode;
+
+      if(
+        node.parentElement?.closest(
+          "script,style,button"
+        )
+      ){
+        continue;
+      }
+
+      textNodes.push(node);
+    }
+
+    textNodes.forEach(node=>{
+
+      const match=findSearchMatch(
+        node.nodeValue,
+        keyword
+      );
+
+      if(!match){
+        return;
+      }
+
+      const text=node.nodeValue;
+
+      const before=document.createTextNode(
+        text.slice(0,match.index)
+      );
+
+      const mark=document.createElement("mark");
+
+      mark.className="search-highlight";
+
+      mark.textContent=text.slice(
+        match.index,
+        match.index+match.length
+      );
+
+      const after=document.createTextNode(
+        text.slice(match.index+match.length)
+      );
+
+      node.replaceWith(before,mark,after);
+
+      if(!firstMark){
+        firstMark=mark;
+      }
 
     });
+  }
+
+  // 6. 정확한 항목으로 스크롤 이동
+  requestAnimationFrame(()=>{
+
+    const destination=firstMark||target;
+
+    destination.scrollIntoView({
+      behavior:"instant",
+      block:"center",
+      inline:"nearest"
+    });
+
+    // 검색 위치 강조 효과
+    target.classList.add("search-target-flash");
+
+    setTimeout(()=>{
+
+      target.classList.remove("search-target-flash");
+
+    },2200);
 
   });
 
 }
+
 window.runSearch=function(){
 const raw=search.value;
 clear.style.display=raw.trim()?"block":"none";
