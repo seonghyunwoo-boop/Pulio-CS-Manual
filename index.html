@@ -4604,7 +4604,29 @@ function getSearchMatches(raw){
       a.title.localeCompare(b.title,"ko")
     );
 
+  // 입력한 검색어가 실제로 포함된 결과를 우선 표시
+  const exactKeyword = normalize(keyword);
+
+  const exactResults = results.filter(item => {
+    const title = normalize(item.title);
+    const subtitle = normalize(item.subtitle);
+    const text = normalize(item.text);
+
+    return (
+      title.includes(exactKeyword) ||
+      subtitle.includes(exactKeyword) ||
+      text.includes(exactKeyword)
+    );
+  });
+
+  // 정확한 검색 결과가 있으면 유사 검색 결과 제외
+  if(exactResults.length > 0){
+    return exactResults.slice(0,25);
+  }
+
+  // 정확한 결과가 없을 때만 기존 유사어 검색 적용
   return results.slice(0,25);
+}
 }
 function renderSearchResults(matches,raw){
 
