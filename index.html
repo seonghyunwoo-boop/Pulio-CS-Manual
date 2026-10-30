@@ -4730,45 +4730,71 @@ function normalizeSearchNumber(text) {
 
 function findSearchMatch(text, query){
 
-  const original=String(text||"");
-  const keyword=String(query||"").trim();
+  const original = String(text || "");
+  const keyword = String(query || "").trim();
 
-  if(!keyword)return null;
+  if(!keyword) return null;
 
-  const numberQuery=keyword.replace(/,/g,"");
+  // 1. 숫자 검색
+  // 예: 80000 → 80,000원
+  const numberQuery = keyword.replace(/,/g, "");
 
   if(/^\d+원?$/.test(numberQuery)){
 
-    const digits=numberQuery.replace(/원$/,"");
+    const digits = numberQuery.replace(/원$/, "");
 
-    const pattern=digits
+    const pattern = digits
       .split("")
       .join(",?");
 
-    const regex=new RegExp(
-      "(?<![0-9,])"+pattern+"(?:원)?(?![0-9,])",
-      "g"
+    const regex = new RegExp(
+      "(?<![0-9,])" + pattern + "(?:원)?(?![0-9,])",
+      "i"
     );
 
-    const match=regex.exec(original);
+    const match = regex.exec(original);
 
     if(match){
       return {
-        index:match.index,
-        length:match[0].length
+        index: match.index,
+        length: match[0].length
       };
     }
   }
 
-  const index=original.toLowerCase()
+  // 2. 검색어 그대로 일치하는 경우
+  const exactIndex = original.toLowerCase()
     .indexOf(keyword.toLowerCase());
 
-  if(index===-1)return null;
+  if(exactIndex !== -1){
+    return {
+      index: exactIndex,
+      length: keyword.length
+    };
+  }
 
-  return {
-    index,
-    length:keyword.length
-  };
+  // 3. 띄어쓰기가 달라도 검색
+  // 예: 마사지매트 → 마사지 매트
+  const compactKeyword = keyword.replace(/\s+/g, "");
+
+  const escaped = [...compactKeyword]
+    .map(char =>
+      char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    )
+    .join("\\s*");
+
+  const flexibleRegex = new RegExp(escaped, "i");
+
+  const match = flexibleRegex.exec(original);
+
+  if(match){
+    return {
+      index: match.index,
+      length: match[0].length
+    };
+  }
+
+  return null;
 }
   
 function makeSearchSnippet(text,raw){
@@ -4844,167 +4870,182 @@ window.openIndexedSearchResult=function(index){
 
 function focusSearchTarget(item){
 
-  const root=document.getElementById("pageContent");
+  const root = document.getElementById("pageContent");
 
-  if(!root)return;
+  if(!root) return;
 
-  const searchInput=document.getElementById("manualSearch");
-  const keyword=searchInput?.value.trim()||"";
+  const searchInput = document.getElementById("manualSearch");
+  const keyword = searchInput?.value.trim() || "";
 
-  // 기존 음영 제거
-  root.querySelectorAll(".search-highlight").forEach(mark=>{
+  if(!keyword) return;
+
+  // 기존 검색 음영 제거
+  root.querySelectorAll(".search-highlight").forEach(mark => {
     mark.replaceWith(
       document.createTextNode(mark.textContent)
     );
   });
 
-  root.normalize();
+  let target = null;
 
-  let target=null;
-
-   // 1. 검색 결과에 저장된 정확한 위치 확인
+  // 1. 저장된 검색 위치 확인
   if(Array.isArray(item.targetPath)){
 
-    let node=root;
+    let node = root;
 
-    // 즐겨찾기 버튼 등 추가된 요소를 제외하고 위치 확인
-    const originalChildren = Array.from(root.children).filter(
-      el => !el.classList.contains("v22-page-actions")
-    );
+    for(const index of item.targetPath){
 
-    item.targetPath.forEach((index, depth) => {
+      if(!node) break;
 
-      if(!node) return;
+      node = node.children[index];
+    }
 
-      if(depth === 0){
-        node = originalChildren[index];
-      }else{
-        node = node.children[index];
-      }
-
-    });
-
-    // 저장된 위치에 실제 검색어가 포함되어 있는지 확인
-    if(node && keyword && findSearchMatch(node.textContent, keyword)){
-      target=node;
+    if(
+      node &&
+      findSearchMatch(node.textContent, keyword)
+    ){
+      target = node;
     }
   }
 
-  // 2. 기존 제목 검색
-  if(!target&&item.target){
+  // 2. 저장된 위치가 다르면 실제 검색어로 다시 탐색
+  if(!target){
 
-    const targetText=normalize(item.target);
+    const selectors = [
+      "tr",
+      "h2",
+      "h3",
+      "h4",
+      "p",
+      "li",
+      "td",
+      "th",
+      ".check",
+      ".flow-step",
+      ".product-spec",
+      ".product-note",
+      ".copy-box",
+      ".product-item > summary",
+      ".product-category-summary"
+    ];
 
-    const headings=Array.from(
-      root.querySelectorAll(
-        "h2,h3,h4,.product-item>summary strong,.response-template-head h3,.faq-question,.flow-step strong"
-      )
+    const elements = Array.from(
+      root.querySelectorAll(selectors.join(","))
     );
 
-    target=headings.find(el=>
-      normalize(el.textContent).includes(targetText)
-    );
+    // 검색 결과의 실제 내용과 일치하는 항목 우선
+    target = elements.find(el => {
+
+      const elementText = (el.textContent || "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      return (
+        item.text &&
+        elementText === item.text.trim() &&
+        findSearchMatch(elementText, keyword)
+      );
+    });
+
+    // 정확히 같은 문장이 없으면 검색어로 탐색
+    if(!target){
+
+      target = elements.find(el =>
+        findSearchMatch(el.textContent, keyword)
+      );
+    }
   }
 
-  // 3. 검색어가 포함된 실제 내용 검색
-  if(!target&&keyword){
+  if(!target) return;
 
-    const elements=Array.from(
-      root.querySelectorAll(
-        "h2,h3,h4,p,li,td,th,.check,.flow-step,.product-spec,.product-note,.copy-box,.faq-answer"
-      )
-    );
+  // 3. 접힌 제품 및 카테고리 자동 펼치기
+  let parent = target;
 
-    target=elements.find(el=>
-      findSearchMatch(el.textContent,keyword)
-    );
-  }
+  while(parent && parent !== root){
 
-  if(!target)return;
-
-  // 접혀 있는 항목 자동 펼치기
-  let parent=target;
-
-  while(parent&&parent!==root){
-
-    if(parent.tagName==="DETAILS"){
-      parent.open=true;
+    if(parent.tagName === "DETAILS"){
+      parent.open = true;
     }
 
     if(parent.classList.contains("faq-item")){
       parent.classList.add("open");
     }
 
-    parent=parent.parentElement;
+    parent = parent.parentElement;
   }
 
-  // 검색어에 음영 표시
-  const walker=document.createTreeWalker(
+  // 4. 검색어 음영 표시
+  const walker = document.createTreeWalker(
     target,
     NodeFilter.SHOW_TEXT
   );
 
-  const nodes=[];
+  const nodes = [];
 
   while(walker.nextNode()){
     nodes.push(walker.currentNode);
   }
 
-  let firstMark=null;
+  let firstMark = null;
 
-  nodes.forEach(node=>{
+  nodes.forEach(node => {
 
-    if(!keyword)return;
-
-    const match=findSearchMatch(node.nodeValue,keyword);
-
-    if(!match)return;
-
-    const text=node.nodeValue;
-
-    const before=document.createTextNode(
-      text.slice(0,match.index)
+    const match = findSearchMatch(
+      node.nodeValue,
+      keyword
     );
 
-    const mark=document.createElement("mark");
+    if(!match) return;
 
-    mark.className="search-highlight";
+    const text = node.nodeValue;
 
-    mark.textContent=text.slice(
+    const before = document.createTextNode(
+      text.slice(0, match.index)
+    );
+
+    const mark = document.createElement("mark");
+
+    mark.className = "search-highlight";
+
+    mark.textContent = text.slice(
       match.index,
-      match.index+match.length
+      match.index + match.length
     );
 
-    const after=document.createTextNode(
-      text.slice(match.index+match.length)
+    const after = document.createTextNode(
+      text.slice(match.index + match.length)
     );
 
-    node.replaceWith(before,mark,after);
+    node.replaceWith(before, mark, after);
 
     if(!firstMark){
-      firstMark=mark;
+      firstMark = mark;
     }
   });
 
-  // 해당 내용으로 화면 이동
-  setTimeout(()=>{
+  // 5. 해당 위치로 이동
+  requestAnimationFrame(() => {
 
-    const destination=firstMark||target;
+    requestAnimationFrame(() => {
 
-    destination.scrollIntoView({
-      behavior:"smooth",
-      block:"center"
+      const destination = firstMark || target;
+
+      destination.scrollIntoView({
+        behavior: "instant",
+        block: "center"
+      });
+
+      target.classList.add("search-target-flash");
+
+      setTimeout(() => {
+        target.classList.remove("search-target-flash");
+      }, 2200);
+
     });
 
-    target.classList.add("search-target-flash");
+  });
 
-    setTimeout(()=>{
-      target.classList.remove("search-target-flash");
-    },2200);
-
-  },200);
 }
-
 window.runSearch=function(){
 const raw=search.value;
 clear.style.display=raw.trim()?"block":"none";
