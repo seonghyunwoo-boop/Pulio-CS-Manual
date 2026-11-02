@@ -881,6 +881,161 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 }
 
 .contact-notice {
+/* 문자 발신번호 제목 */
+
+.contact-sms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.contact-sms-count {
+  font-size: 11px;
+  font-weight: 800;
+  color: #7044dd;
+  background: #f0eaff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+/* ==================================
+   문자 발신번호 검색
+================================== */
+
+.contact-sms-search-wrap {
+  position: relative;
+  margin: 12px 0 8px;
+}
+
+.contact-sms-search-wrap > i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8b7a98;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+#contactSmsSearch {
+  width: 100%;
+  height: 44px;
+  padding: 0 42px;
+  border: 1px solid #e5dcef;
+  border-radius: 11px;
+  background: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: .2s;
+}
+
+#contactSmsSearch:focus {
+  border-color: #7044dd;
+  box-shadow: 0 0 0 3px rgba(112,68,221,.08);
+}
+
+.contact-sms-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #a096a9;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.contact-sms-clear:hover {
+  color: #4b1d91;
+}
+
+.contact-sms-search-count {
+  margin: 0 0 10px;
+  color: #85758f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.contact-sms-empty {
+  padding: 30px 15px;
+  text-align: center;
+  color: #8b7a98;
+}
+
+.contact-sms-empty > i {
+  font-size: 24px;
+  color: #b5a1d1;
+  margin-bottom: 10px;
+}
+
+.contact-sms-empty p {
+  font-size: 13px;
+  font-weight: 800;
+  color: #5e4b6c;
+}
+
+.contact-sms-empty small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+}
+/* 문자 발신번호 목록 */
+
+.contact-sms-box {
+  background: #faf8ff;
+  border: 1px solid #e9e2f0;
+  border-radius: 14px;
+  padding: 15px;
+}
+
+.contact-sms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.contact-sms-grid span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 10px 5px;
+  background: #fff;
+  border: 1px solid #ebe7f1;
+  border-radius: 9px;
+  color: #4b4055;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 모바일 화면 */
+
+@media (max-width: 620px) {
+
+  .contact-sms-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact-sms-grid span {
+    font-size: 10px;
+    padding: 9px 4px;
+  }
+
+}
+
+@media (max-width: 360px) {
+
+  .contact-sms-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+  
   margin-top: 20px;
   padding: 13px 15px;
   background: #faf8ff;
@@ -1384,63 +1539,99 @@ CS MANUAL
 
     </div>
 
-    <!-- 문자 발신번호 -->
+<!-- 문자 발신번호 -->
 
-    <h3 class="contact-section-title">
-      <i class="fa-solid fa-comment-sms"></i>
-      문자 발신번호
-    </h3>
+<div class="contact-sms-header">
 
-    <div class="manager-list">
+  <h3 class="contact-section-title">
+    <i class="fa-solid fa-comment-sms"></i>
+    당사 문자 발신번호
+  </h3>
 
-      <div class="manager-item">
+  <span class="contact-sms-count">총 29개</span>
 
-        <h3>고객 안내 문자</h3>
+</div>
+<!-- 문자 발신번호 검색 -->
 
-        <p>
-          <strong>발신번호 :</strong>
-          확인 후 등록
-        </p>
+<div class="contact-sms-search-wrap">
 
-        <p>
-          <strong>발송 목적 :</strong>
-          고객 안내 및 상담 관련 문자
-        </p>
+  <i class="fa-solid fa-magnifying-glass"></i>
 
-        <p>
-          <strong>회신 가능 여부 :</strong>
-          확인 필요
-        </p>
+  <input
+    type="search"
+    id="contactSmsSearch"
+    placeholder="발신번호 검색 (숫자만 입력 가능)"
+    autocomplete="off"
+    oninput="filterContactSms()"
+  >
 
-      </div>
+  <button
+    type="button"
+    onclick="clearContactSmsSearch()"
+    class="contact-sms-clear"
+    aria-label="검색어 삭제"
+  >
+    <i class="fa-solid fa-xmark"></i>
+  </button>
 
-      <div class="manager-item">
+</div>
 
-        <h3>행사 및 프로모션 안내 문자</h3>
+<p id="contactSmsSearchCount" class="contact-sms-search-count">
+  전체 29개 번호
+</p>
+<div class="contact-sms-box">
 
-        <p>
-          <strong>발신번호 :</strong>
-          확인 후 등록
-        </p>
+  <div class="contact-sms-grid">
 
-        <p>
-          <strong>발송 목적 :</strong>
-          행사 및 프로모션 관련 안내
-        </p>
+    <span>070-8019-0879</span>
+    <span>070-8018-2712</span>
+    <span>070-8018-2713</span>
+    <span>070-8018-5328</span>
+    <span>070-8018-0664</span>
+    <span>070-8018-0647</span>
+    <span>070-8018-0642</span>
+    <span>070-8018-2943</span>
+    <span>070-8018-4364</span>
+    <span>070-8018-3818</span>
+    <span>070-8018-4373</span>
+    <span>070-8018-5326</span>
+    <span>070-8018-4374</span>
+    <span>070-8018-2941</span>
+    <span>070-4571-6059</span>
+    <span>070-8018-4375</span>
+    <span>070-8019-0419</span>
+    <span>070-8018-3247</span>
+    <span>070-8018-3024</span>
+    <span>070-8018-3819</span>
+    <span>070-8018-3141</span>
+    <span>070-8018-3025</span>
+    <span>070-8018-4372</span>
+    <span>070-8018-3825</span>
+    <span>070-8018-5325</span>
+    <span>070-8098-5144</span>
+    <span>070-8018-5327</span>
+    <span>070-8018-0331</span>
+    <span>070-8018-7424</span>
 
-        <p>
-          <strong>담당 부서 :</strong>
-          확인 필요
-        </p>
+  </div>
 
-      </div>
+<!-- 검색 결과 없음 -->
 
-    </div>
+  <div
+    id="contactSmsEmpty"
+    class="contact-sms-empty"
+    style="display:none;"
+  >
+    <i class="fa-solid fa-circle-info"></i>
+    <p>일치하는 발신번호가 없습니다.</p>
+    <small>번호를 다시 확인하거나 담당 부서에 확인해 주세요.</small>
+  </div>
 
-    <p class="contact-notice">
-      ※ 문자 발신번호는 담당 부서 확인 후 등록하며,
-      발신번호와 고객 상담 가능 번호는 구분하여 안내
-    </p>
+</div>
+<p class="contact-notice">
+  ※ 상기 070 번호는 당사 문자 발신번호 확인을 위한 내부 참고용
+  고객 상담이 가능한 연락처와는 구분하여 안내 필요
+</p>
 
   </div>
 
@@ -5987,6 +6178,15 @@ function openContactPopup() {
 
   document.body.style.overflow = "hidden";
 
+  // 검색어 초기화
+  const input = document.getElementById("contactSmsSearch");
+
+  if (input) {
+    input.value = "";
+  }
+
+  filterContactSms();
+
 }
 
 // 연락처 팝업 닫기
@@ -6002,7 +6202,92 @@ function closeContactPopup() {
   document.body.style.overflow = "";
 
 }
+/* ==================================
+   문자 발신번호 검색 기능
+================================== */
 
+// 전화번호에서 숫자만 추출
+
+function normalizeContactNumber(value) {
+
+  return String(value || "").replace(/\D/g, "");
+
+}
+
+
+// 발신번호 검색
+
+function filterContactSms() {
+
+  const input = document.getElementById("contactSmsSearch");
+
+  const grid = document.querySelector(
+    "#contactPopup .contact-sms-grid"
+  );
+
+  const count = document.getElementById("contactSmsSearchCount");
+
+  const empty = document.getElementById("contactSmsEmpty");
+
+  if (!input || !grid) return;
+
+  // 하이픈, 공백 등 제외하고 숫자만 비교
+  const keyword = normalizeContactNumber(input.value);
+
+  const numbers = Array.from(
+    grid.querySelectorAll("span")
+  );
+
+  let matched = 0;
+
+  numbers.forEach(item => {
+
+    const number = normalizeContactNumber(item.textContent);
+
+    const isMatch = !keyword || number.includes(keyword);
+
+    item.style.display = isMatch ? "" : "none";
+
+    if (isMatch) matched++;
+
+  });
+
+  // 검색 결과 개수 표시
+  if (count) {
+
+    count.textContent = keyword
+      ? `검색 결과 ${matched}개`
+      : `전체 ${numbers.length}개 번호`;
+
+  }
+
+  // 검색 결과가 없을 경우
+  if (empty) {
+
+    empty.style.display = matched === 0
+      ? "block"
+      : "none";
+
+  }
+
+}
+
+
+// 검색어 초기화
+
+function clearContactSmsSearch() {
+
+  const input = document.getElementById("contactSmsSearch");
+
+  if (!input) return;
+
+  input.value = "";
+
+  filterContactSms();
+
+  input.focus();
+
+}
 // 팝업 바깥 영역 클릭 시 닫기
 
 document.getElementById("contactPopup")?.addEventListener(
