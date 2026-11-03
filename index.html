@@ -5774,6 +5774,270 @@ window.startPulioManual = function () {
 };
 </script>
 
+  <!-- Firebase 로그인 및 사용자 권한 확인 -->
+<script type="module">
+
+import { initializeApp, getApps, getApp } from
+"https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8",
+  authDomain: "pulio-cs-manual.firebaseapp.com",
+  projectId: "pulio-cs-manual",
+  storageBucket: "pulio-cs-manual.firebasestorage.app",
+  messagingSenderId: "161974682041",
+  appId: "1:161974682041:web:9b71f494beea785db7b668"
+};
+
+const app = getApps().length
+  ? getApp()
+  : initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+// 로그인 화면 생성
+const loginScreen = document.createElement("div");
+
+loginScreen.id = "pulioLoginScreen";
+
+loginScreen.innerHTML = `
+  <div class="pulio-login-box">
+    <h2>풀리오 CS 매뉴얼</h2>
+    <p>등록된 계정으로 로그인해 주세요.</p>
+
+    <form id="pulioLoginForm">
+      <input
+        type="email"
+        id="pulioLoginEmail"
+        placeholder="이메일"
+        autocomplete="username"
+        required
+      >
+
+      <input
+        type="password"
+        id="pulioLoginPassword"
+        placeholder="비밀번호"
+        autocomplete="current-password"
+        required
+      >
+
+      <button type="submit" id="pulioLoginButton">
+        로그인
+      </button>
+    </form>
+
+    <p id="pulioLoginMessage"></p>
+  </div>
+`;
+
+document.body.appendChild(loginScreen);
+
+
+// 로그인 화면 스타일
+const loginStyle = document.createElement("style");
+
+loginStyle.textContent = `
+  #pulioLoginScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    background: #f5f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+  }
+
+  .pulio-login-box {
+    width: 360px;
+    max-width: calc(100% - 40px);
+    padding: 35px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .pulio-login-box h2 {
+    margin-bottom: 12px;
+  }
+
+  .pulio-login-box p {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .pulio-login-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px;
+    margin-top: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .pulio-login-box button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 8px;
+    background: #252b45;
+    color: white;
+    cursor: pointer;
+  }
+
+  #pulioLoginMessage {
+    color: #d93025;
+    margin-top: 15px;
+  }
+`;
+
+document.head.appendChild(loginStyle);
+
+
+const loginForm = document.getElementById("pulioLoginForm");
+const loginMessage = document.getElementById("pulioLoginMessage");
+const loginButton = document.getElementById("pulioLoginButton");
+
+let manualStarted = false;
+
+
+// 사용자 권한 확인
+async function checkUserPermission(user) {
+
+  const uid = user.uid;
+
+  const adminRef = doc(db, "admins", uid);
+  const adminSnap = await getDoc(adminRef);
+
+  if (
+    adminSnap.exists() &&
+    adminSnap.data().role === "admin" &&
+    adminSnap.data().status === "active"
+  ) {
+    return "admin";
+  }
+
+  const counselorRef = doc(db, "counselors", uid);
+  const counselorSnap = await getDoc(counselorRef);
+
+  if (
+    counselorSnap.exists() &&
+    counselorSnap.data().role === "counselor" &&
+    counselorSnap.data().status === "active"
+  ) {
+    return "counselor";
+  }
+
+  return null;
+}
+
+
+// 로그인 처리
+loginForm.addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  const email = document.getElementById("pulioLoginEmail").value.trim();
+  const password = document.getElementById("pulioLoginPassword").value;
+
+  loginMessage.textContent = "";
+  loginButton.disabled = true;
+
+  try {
+
+    const result = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    const role = await checkUserPermission(result.user);
+
+    if (!role) {
+      await signOut(auth);
+      loginMessage.textContent = "접근 권한이 없는 계정입니다.";
+      return;
+    }
+
+    loginScreen.style.display = "none";
+
+    if (!manualStarted) {
+      manualStarted = true;
+      window.startPulioManual();
+    }
+
+  } catch (error) {
+
+    console.error("Login error:", error.code);
+
+    loginMessage.textContent =
+      "로그인 정보를 확인하거나 관리자에게 문의해 주세요.";
+
+  } finally {
+
+    loginButton.disabled = false;
+
+  }
+
+});
+
+
+// 기존 로그인 상태 확인
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    loginScreen.style.display = "flex";
+    return;
+  }
+
+  try {
+
+    const role = await checkUserPermission(user);
+
+    if (!role) {
+      loginScreen.style.display = "flex";
+      await signOut(auth);
+      return;
+    }
+
+    loginScreen.style.display = "none";
+
+    if (!manualStarted) {
+      manualStarted = true;
+      window.startPulioManual();
+    }
+
+  } catch (error) {
+
+    console.error("Permission error:", error);
+    loginScreen.style.display = "flex";
+    loginMessage.textContent = "계정 권한을 확인할 수 없습니다.";
+
+  }
+
+});
+
+</script>
+
 <script type="module">
 const status=document.getElementById('syncStatusText');
 const err=document.getElementById('firebaseError');
