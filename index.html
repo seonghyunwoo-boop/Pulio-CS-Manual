@@ -5760,11 +5760,18 @@ if(!event.target.closest(".search-box"))closeSearchResults();
 });
 refreshManualSearchIndex();
 
-buildSidebar();
-renderHomeUpdates();
-const initial=location.hash.replace("#","");
-if(initial && initial!=="home" && pages[initial]) openPage(initial);
-else showHome();
+window.startPulioManual = function () {
+  buildSidebar();
+  renderHomeUpdates();
+
+  const initial = location.hash.replace("#", "");
+
+  if (initial && initial !== "home" && pages[initial]) {
+    openPage(initial);
+  } else {
+    showHome();
+  }
+};
 </script>
 
 <script type="module">
