@@ -5979,10 +5979,12 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     loginScreen.style.display = "none";
+    document.body.classList.add("pulio-authenticated");
 
     if (!manualStarted) {
       manualStarted = true;
       window.startPulioManual();
+      window.dispatchEvent(new Event("pulio-auth-ready"));
     }
 
   } catch (error) {
@@ -6020,10 +6022,12 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     loginScreen.style.display = "none";
+    document.body.classList.add("pulio-authenticated");
 
     if (!manualStarted) {
       manualStarted = true;
       window.startPulioManual();
+      window.dispatchEvent(new Event("pulio-auth-ready"));
     }
 
   } catch (error) {
