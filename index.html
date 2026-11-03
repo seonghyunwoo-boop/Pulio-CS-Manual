@@ -4452,6 +4452,7 @@ if(!event.target.closest(".search-box"))closeSearchResults();
 refreshManualSearchIndex();
 
 window.startPulioManual = function () {
+  renderEditableMenus();
   buildSidebar();
   renderHomeUpdates();
 
@@ -4694,7 +4695,6 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     await loadProtectedManual(result.user);
-    await loadProtectedManual(user);
     loginScreen.style.display = "none";
     document.body.classList.add("pulio-authenticated");
 
@@ -4738,6 +4738,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
+    await loadProtectedManual(user);
     loginScreen.style.display = "none";
     document.body.classList.add("pulio-authenticated");
 
