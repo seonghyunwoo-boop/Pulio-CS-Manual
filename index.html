@@ -1215,9 +1215,17 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 .product-checklist{margin-top:18px;padding:16px;border:1px solid #e9e0f2;border-radius:15px;background:#fbf9fd}.product-checklist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}.product-checklist-title{font-size:14px;font-weight:800;color:#5f3b79}.product-checklist-reset{border:0;background:transparent;color:#8d7a98;font-size:11px;cursor:pointer}.product-checklist-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.product-check-item{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;background:#fff;border:1px solid #eee8f3;border-radius:10px;font-size:12px;line-height:1.45;cursor:pointer}.product-check-item input{margin-top:2px;accent-color:var(--pulio)}.product-check-progress{font-size:11px;color:#8c7b95;margin-top:10px}.product-checklist.complete{border-color:#b8dfd1;background:#f5fcf9}.template-related{margin-top:11px;padding-top:10px;border-top:1px dashed #e8e0ee}.template-related-label{font-size:10px;font-weight:800;color:#8b7898;margin-bottom:7px}.template-related-links{display:flex;flex-wrap:wrap;gap:6px}.template-related-links button{border:1px solid #e4d9ed;background:#fff;color:#6b4684;border-radius:999px;padding:6px 9px;font-size:10px;cursor:pointer}.template-related-links button:hover{background:#f7f1fb}
 @media(max-width:700px){.product-checklist-items{grid-template-columns:1fr}.search-intent-box{margin-left:0;margin-right:0}}
 </style>
+<style id="pulioAuthPrepaint">
+/* 로그인 승인 전에는 어떤 홈/매뉴얼 화면도 표시하지 않는다. */
+html:not(.pulio-auth-ready) body > :not(#pulioLoginScreen) { visibility: hidden !important; }
+html:not(.pulio-auth-ready) { background: #f5f6fa !important; }
+#pulioLoginScreen { position:fixed;inset:0;z-index:2147483647;background:#f5f6fa;display:flex;align-items:center;justify-content:center; }
+html.pulio-auth-ready #pulioLoginScreen { display:none !important; }
+</style>
 </head>
 
 <body>
+<div id="pulioLoginScreen"><div style="font:600 15px Arial,sans-serif;color:#58328a;text-align:center">풀리오 CS 매뉴얼<br><small style="display:block;margin-top:12px;color:#777">로그인 확인 중...</small></div></div>
 
 <header class="site-header">
   <div class="brand" onclick="showHome()">
@@ -4528,9 +4536,7 @@ async function loadProtectedManual(user) {
 
 
 // 로그인 화면 생성
-const loginScreen = document.createElement("div");
-
-loginScreen.id = "pulioLoginScreen";
+const loginScreen = document.getElementById("pulioLoginScreen");
 
 loginScreen.innerHTML = `
   <div class="pulio-login-box">
@@ -4562,9 +4568,6 @@ loginScreen.innerHTML = `
     <p id="pulioLoginMessage"></p>
   </div>
 `;
-
-document.body.appendChild(loginScreen);
-
 
 // 로그인 화면 스타일
 const loginStyle = document.createElement("style");
@@ -4647,6 +4650,7 @@ pulioLogoutButton.addEventListener('click', async () => {
   if (!confirm('로그아웃하시겠습니까?')) return;
   pulioLogoutButton.disabled = true;
   try {
+    document.documentElement.classList.remove("pulio-auth-ready");
     await signOut(auth);
     window.location.reload();
   } catch (error) {
@@ -4713,33 +4717,8 @@ loginForm.addEventListener("submit", async (event) => {
 
   try {
 
-    const result = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    const role = await checkUserPermission(result.user);
-
-    if (!role) {
-      delete document.body.dataset.pulioRole;
-      await signOut(auth);
-      loginMessage.textContent = "접근 권한이 없는 계정입니다.";
-      return;
-    }
-
-    document.body.dataset.pulioRole = role;
-    await loadProtectedManual(result.user);
-    loginScreen.style.display = "none";
-    document.body.classList.add("pulio-authenticated");
-    setPulioLoggedIn(true);
-
-    if (!manualStarted) {
-      manualStarted = true;
-      window.startPulioManual();
-      window.dispatchEvent(new Event("pulio-auth-ready"));
-    }
-
+    // 세션 표시와 매뉴얼 로드는 onAuthStateChanged 한 곳에서만 처리
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
 
     console.error("Login error:", error.code);
@@ -4757,11 +4736,15 @@ loginForm.addEventListener("submit", async (event) => {
 
 
 // 기존 로그인 상태 확인
+let authRevision = 0;
 onAuthStateChanged(auth, async (user) => {
+  const revision = ++authRevision;
 
   if (!user) {
     delete document.body.dataset.pulioRole;
     setPulioLoggedIn(false);
+    document.documentElement.classList.remove("pulio-auth-ready");
+    document.body.classList.remove("pulio-authenticated");
     loginScreen.style.display = "flex";
     return;
   }
@@ -4769,16 +4752,21 @@ onAuthStateChanged(auth, async (user) => {
   try {
 
     const role = await checkUserPermission(user);
+    if (revision !== authRevision) return;
 
     if (!role) {
       delete document.body.dataset.pulioRole;
-      loginScreen.style.display = "flex";
+      document.documentElement.classList.remove("pulio-auth-ready");
+    document.body.classList.remove("pulio-authenticated");
+    loginScreen.style.display = "flex";
       await signOut(auth);
       return;
     }
 
     document.body.dataset.pulioRole = role;
     await loadProtectedManual(user);
+    if (revision !== authRevision) return;
+    document.documentElement.classList.add("pulio-auth-ready");
     loginScreen.style.display = "none";
     document.body.classList.add("pulio-authenticated");
     setPulioLoggedIn(true);
@@ -4791,8 +4779,11 @@ onAuthStateChanged(auth, async (user) => {
 
   } catch (error) {
 
+    if (revision !== authRevision) return;
     console.error("Permission error:", error);
     setPulioLoggedIn(false);
+    document.documentElement.classList.remove("pulio-auth-ready");
+    document.body.classList.remove("pulio-authenticated");
     loginScreen.style.display = "flex";
     loginMessage.textContent = "계정 권한을 확인할 수 없습니다.";
 
