@@ -4635,6 +4635,39 @@ const loginButton = document.getElementById("pulioLoginButton");
 
 let manualStarted = false;
 
+// 로그인 후 두 계정 모두 이용 가능한 로그아웃 버튼
+const pulioLogoutButton = document.createElement('button');
+pulioLogoutButton.id = 'pulioLogoutButton';
+pulioLogoutButton.type = 'button';
+pulioLogoutButton.textContent = '로그아웃';
+pulioLogoutButton.setAttribute('aria-label', '현재 계정 로그아웃');
+pulioLogoutButton.style.cssText = 'position:fixed;top:55px;right:18px;z-index:9500;padding:9px 14px;border:1px solid #d9cbea;border-radius:12px;background:white;color:#58328a;font:700 12px Arial,sans-serif;box-shadow:0 4px 14px #0002;cursor:pointer;display:none';
+document.body.appendChild(pulioLogoutButton);
+pulioLogoutButton.addEventListener('click', async () => {
+  if (!confirm('로그아웃하시겠습니까?')) return;
+  pulioLogoutButton.disabled = true;
+  try {
+    await signOut(auth);
+    window.location.reload();
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('로그아웃에 실패했습니다. 다시 시도해 주세요.');
+    pulioLogoutButton.disabled = false;
+  }
+});
+function setPulioLoggedIn(isLoggedIn) {
+  pulioLogoutButton.style.display = isLoggedIn ? 'block' : 'none';
+  if (isLoggedIn) {
+    // 로그인 전에 열린 레이어가 스크롤을 잠근 경우 해제
+    const activeModal = document.querySelector('#adminOverlay.open, #managerPopup.open, #contactPopup.open');
+    if (!activeModal) {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflowY = 'auto';
+    }
+  }
+}
+
+
 
 // 사용자 권한 확인
 async function checkUserPermission(user) {
@@ -4699,6 +4732,7 @@ loginForm.addEventListener("submit", async (event) => {
     await loadProtectedManual(result.user);
     loginScreen.style.display = "none";
     document.body.classList.add("pulio-authenticated");
+    setPulioLoggedIn(true);
 
     if (!manualStarted) {
       manualStarted = true;
@@ -4727,6 +4761,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     delete document.body.dataset.pulioRole;
+    setPulioLoggedIn(false);
     loginScreen.style.display = "flex";
     return;
   }
@@ -4746,6 +4781,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadProtectedManual(user);
     loginScreen.style.display = "none";
     document.body.classList.add("pulio-authenticated");
+    setPulioLoggedIn(true);
 
     if (!manualStarted) {
       manualStarted = true;
@@ -4756,6 +4792,7 @@ onAuthStateChanged(auth, async (user) => {
   } catch (error) {
 
     console.error("Permission error:", error);
+    setPulioLoggedIn(false);
     loginScreen.style.display = "flex";
     loginMessage.textContent = "계정 권한을 확인할 수 없습니다.";
 
