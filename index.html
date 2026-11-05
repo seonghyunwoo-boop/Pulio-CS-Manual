@@ -4477,12 +4477,13 @@ window.startPulioManual = function () {
   <!-- Firebase 로그인 및 사용자 권한 확인 -->
 <script type="module">
 
-import { initializeApp, getApps, getApp } from
+import { initializeApp, getApps, getApp, deleteApp } from
 "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
 import {
   getAuth,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
@@ -4490,7 +4491,10 @@ import {
 import {
   getFirestore,
   doc,
-  getDoc
+  getDoc,
+  setDoc,
+  getDocs,
+  collection
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
@@ -4512,7 +4516,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Firebase Authentication과 별도로 잠금 규칙이 적용된 Realtime Database
-const { getDatabase, ref, get } = await import(
+const { getDatabase, ref, get, set, remove } = await import(
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js"
 );
 const manualDatabase = getDatabase(app, firebaseConfig.databaseURL);
@@ -4674,6 +4678,97 @@ function setPulioLoggedIn(isLoggedIn) {
 
 
 
+// 관리자 전용 계정 관리: 별도 Firebase 앱으로 상담사 계정을 생성해 관리자 로그인을 유지
+const accountButton = document.createElement('button');
+accountButton.id = 'pulioAccountButton';
+accountButton.type = 'button';
+accountButton.textContent = '계정 관리';
+accountButton.style.cssText = pulioLogoutButton.style.cssText;
+accountButton.style.display = 'none';
+pulioLogoutButton.before(accountButton);
+const accountDialog = document.createElement('dialog');
+accountDialog.id = 'pulioAccountDialog';
+accountDialog.style.cssText = 'width:min(600px,94vw);max-height:85vh;overflow:auto;border:1px solid #ddd1ef;border-radius:18px;padding:24px;box-shadow:0 15px 70px #241f2c55;margin:auto';
+accountDialog.innerHTML = `
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>상담사 계정 관리</h2><button type="button" id="pulioAccountClose">닫기</button></div>
+  <p style="margin:12px 0;font-size:13px">상담사 계정을 등록하거나 접근 권한을 해지할 수 있습니다.</p>
+  <form id="pulioAccountCreate" style="display:grid;gap:10px;margin-bottom:16px">
+    <input id="pulioNewEmail" type="email" placeholder="상담사 이메일" autocomplete="off" required style="padding:10px;border:1px solid #ddd;border-radius:8px">
+    <input id="pulioNewPassword" type="password" placeholder="임시 비밀번호 (6자 이상)" minlength="6" autocomplete="new-password" required style="padding:10px;border:1px solid #ddd;border-radius:8px">
+    <button type="submit" style="padding:10px;border:0;border-radius:8px;background:#4b1d91;color:#fff;cursor:pointer">상담사 계정 등록</button>
+  </form>
+  <p id="pulioAccountStatus" role="status" style="font-size:13px;white-space:pre-wrap;margin-bottom:12px"></p>
+  <div id="pulioAccountList"></div>`;
+document.body.appendChild(accountDialog);
+document.getElementById('pulioAccountClose').onclick = () => accountDialog.close();
+const accountStatus = document.getElementById('pulioAccountStatus');
+const accountList = document.getElementById('pulioAccountList');
+const accountAdmin = () => document.body.dataset.pulioRole === 'admin' && auth.currentUser;
+async function refreshAccounts(){
+  if (!accountAdmin()) return;
+  accountList.replaceChildren();
+  const result = await getDocs(collection(db,'counselors'));
+  for (const item of result.docs){
+    const data=item.data();
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-top:1px solid #eee;flex-wrap:wrap';
+    const label=document.createElement('span');
+    label.textContent=(data.email||item.id)+' · '+(data.status==='active'?'승인':'접근 해지');
+    label.style.cssText='font-size:13px;overflow-wrap:anywhere';
+    const button=document.createElement('button');
+    const enable=data.status!=='active';
+    button.textContent=enable?'접근 승인':'접근 해지';
+    button.type='button';
+    button.style.cssText='border:1px solid #d9cbea;background:#fff;border-radius:8px;padding:7px;cursor:pointer';
+    button.onclick=async()=>{
+      if(!accountAdmin() || !confirm(label.textContent+' 계정의 권한을 변경할까요?')) return;
+      button.disabled=true;
+      try {
+        // RTDB 접근을 먼저 차단하고 Firestore 상태를 갱신
+        if (enable){
+          await setDoc(doc(db,'counselors',item.id),{...data,role:'counselor',status:'active'});
+          await set(ref(manualDatabase,'authorizedUsers/'+item.id),true);
+        } else {
+          await remove(ref(manualDatabase,'authorizedUsers/'+item.id));
+          await setDoc(doc(db,'counselors',item.id),{...data,role:'counselor',status:'inactive'});
+        }
+        accountStatus.textContent='권한 변경 완료';
+        await refreshAccounts();
+      } catch(e){accountStatus.textContent='권한 변경 실패: '+e.message;button.disabled=false;}
+    };
+    row.append(label,button);
+    accountList.appendChild(row);
+  }
+}
+accountButton.onclick=async()=>{
+  if(!accountAdmin()) return;
+  accountDialog.showModal();
+  accountStatus.textContent='계정 목록 조회 중...';
+  try {await refreshAccounts();accountStatus.textContent='';}
+  catch(e){accountStatus.textContent='계정 조회 실패: '+e.message;}
+};
+document.getElementById('pulioAccountCreate').onsubmit=async(event)=>{
+  event.preventDefault();
+  if(!accountAdmin())return;
+  const email=document.getElementById('pulioNewEmail').value.trim();
+  const password=document.getElementById('pulioNewPassword').value;
+  accountStatus.textContent='계정 등록 중...';
+  const submit=event.target.querySelector('button[type=submit]');
+  submit.disabled=true;
+  let secondary;
+  try{
+    secondary=initializeApp(firebaseConfig,'pulio-account-create-'+Date.now());
+    const credential=await createUserWithEmailAndPassword(getAuth(secondary),email,password);
+    const uid=credential.user.uid;
+    await setDoc(doc(db,'counselors',uid),{email,role:'counselor',status:'active'});
+    await set(ref(manualDatabase,'authorizedUsers/'+uid),true);
+    accountStatus.textContent='등록 완료. 임시 비밀번호를 상담사에게 안전하게 전달해 주세요.';
+    event.target.reset();
+    await refreshAccounts();
+  }catch(e){accountStatus.textContent='등록 중 오류: '+e.message+'\n계정이 일부 생성됐을 수 있으니 목록과 Authentication을 확인해 주세요.';}
+  finally{if(secondary){try{await signOut(getAuth(secondary));await deleteApp(secondary);}catch(e){console.error(e)}}submit.disabled=false;}
+};
+
 // 사용자 권한 확인
 async function checkUserPermission(user) {
 
@@ -4743,6 +4838,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     delete document.body.dataset.pulioRole;
+    accountButton.style.display = "none";
     if (typeof closeAdminPanel === 'function') closeAdminPanel();
     setPulioLoggedIn(false);
     document.documentElement.classList.remove("pulio-auth-ready");
@@ -4759,6 +4855,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!role) {
       delete document.body.dataset.pulioRole;
+      accountButton.style.display = "none";
       document.documentElement.classList.remove("pulio-auth-ready");
     document.body.classList.remove("pulio-authenticated");
     loginScreen.style.display = "flex";
@@ -4767,6 +4864,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     document.body.dataset.pulioRole = role;
+    accountButton.style.display = role === "admin" ? "block" : "none";
     await loadProtectedManual(user);
     if (revision !== authRevision) return;
     document.documentElement.classList.add("pulio-auth-ready");
