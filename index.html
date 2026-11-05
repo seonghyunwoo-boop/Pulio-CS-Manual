@@ -4495,12 +4495,13 @@ import {
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDg3IxEXn8ElFGTes7NPFz9DD2kz_tP54U",
-  authDomain: "pulio-cs-manual-test.firebaseapp.com",
-  projectId: "pulio-cs-manual-test",
-  storageBucket: "pulio-cs-manual-test.firebasestorage.app",
-  messagingSenderId: "403573625292",
-  appId: "1:403573625292:web:5ba9e8dcb37f2544998d69"
+  apiKey: "AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8",
+  authDomain: "pulio-cs-manual.firebaseapp.com",
+  databaseURL: "https://pulio-cs-manual-default-rtdb.firebaseio.com",
+  projectId: "pulio-cs-manual",
+  storageBucket: "pulio-cs-manual.firebasestorage.app",
+  messagingSenderId: "161974682041",
+  appId: "1:161974682041:web:9b71f494beea785db7b668"
 };
 
 const app = getApps().length
@@ -4514,7 +4515,7 @@ const db = getFirestore(app);
 const { getDatabase, ref, get } = await import(
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js"
 );
-const manualDatabase = getDatabase(app, "https://pulio-cs-manual-test-default-rtdb.firebaseio.com");
+const manualDatabase = getDatabase(app, firebaseConfig.databaseURL);
 let manualLoadPromise = null;
 async function loadProtectedManual(user) {
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -4823,7 +4824,7 @@ if(location.protocol==='file:'){
       import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js')
     ]);
-    const firebaseConfig={apiKey:'AIzaSyDg3IxEXn8ElFGTes7NPFz9DD2kz_tP54U',authDomain:'pulio-cs-manual-test.firebaseapp.com',projectId:'pulio-cs-manual-test',storageBucket:'pulio-cs-manual-test.firebasestorage.app',messagingSenderId:'403573625292',appId:'1:403573625292:web:5ba9e8dcb37f2544998d69'};
+    const firebaseConfig={apiKey:'AIzaSyBZBEJZGiSmWCulRyzWzvUEyZCY1sIA2-8',authDomain:'pulio-cs-manual.firebaseapp.com',databaseURL:'https://pulio-cs-manual-default-rtdb.firebaseio.com',projectId:'pulio-cs-manual',storageBucket:'pulio-cs-manual.firebasestorage.app',messagingSenderId:'161974682041',appId:'1:161974682041:web:9b71f494beea785db7b668'};
     const db=getFirestore(initializeApp(firebaseConfig));
 // =====================================
 // 판매처 검색 - 최적화 데이터 수신
