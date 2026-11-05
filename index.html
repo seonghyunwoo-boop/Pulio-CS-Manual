@@ -4772,7 +4772,7 @@ async function refreshAccounts(){
     const enable=data.status!=='active';
     button.textContent=enable?'접근 승인':'접근 해지';
     button.type='button';
-    button.style.cssText='border:1px solid #d9cbea;background:#fff;border-radius:8px;padding:7px;cursor:pointer';
+    button.style.cssText='border:1px solid #d9cbea;background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:700;color:#4b1d91;font-family:inherit;line-height:normal';
     button.onclick=async()=>{
       if(!accountAdmin() || !confirm(label.textContent+' 계정의 권한을 변경할까요?')) return;
       button.disabled=true;
