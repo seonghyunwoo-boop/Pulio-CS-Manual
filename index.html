@@ -4755,7 +4755,10 @@ async function refreshAccounts(){
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-top:1px solid #eee;flex-wrap:wrap';
     const label=document.createElement('span');
-    label.textContent=(data.email||item.id)+' · '+(type==='admin'?'관리자':'상담사')+' · '+(data.status==='active'?'승인':'접근 해지');
+    // 기존 테스트 계정은 초기 Firestore 문서에 email 필드가 없어 UID가 표시됐음.
+    const legacyEmail = item.id === '8d9fASyNSmYfpvHHYo7UTyrjXFf2' ? 'scm_otp@pulio365.com' : '';
+    const displayEmail = data.email || legacyEmail || item.id;
+    label.textContent=displayEmail+' · '+(type==='admin'?'관리자':'상담사')+' · '+(data.status==='active'?'승인':'접근 해지');
     label.style.cssText='font-size:13px;overflow-wrap:anywhere';
     if(type==='admin'){
       const badge=document.createElement('span');
