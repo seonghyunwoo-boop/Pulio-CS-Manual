@@ -4728,7 +4728,7 @@ const accountDialog = document.createElement('dialog');
 accountDialog.id = 'pulioAccountDialog';
 accountDialog.style.cssText = 'width:min(600px,94vw);max-height:85vh;overflow:auto;border:1px solid #ddd1ef;border-radius:18px;padding:24px;box-shadow:0 15px 70px #241f2c55;margin:auto';
 accountDialog.innerHTML = `
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>상담사 계정 관리</h2><button type="button" id="pulioAccountClose" aria-label="계정 관리 닫기" title="닫기" style="width:36px;height:36px;flex:0 0 36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e2d9ed;border-radius:10px;background:#f7f3fc;color:#58328a;font-size:21px;font-weight:500;line-height:1;cursor:pointer">&times;</button></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>계정 관리</h2><button type="button" id="pulioAccountClose" aria-label="계정 관리 닫기" title="닫기" style="width:36px;height:36px;flex:0 0 36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e2d9ed;border-radius:10px;background:#f7f3fc;color:#58328a;font-size:21px;font-weight:500;line-height:1;cursor:pointer">&times;</button></div>
   <p style="margin:12px 0;font-size:13px">상담사 계정을 등록하거나 접근 권한을 해지할 수 있습니다.</p>
   <form id="pulioAccountCreate" style="display:grid;gap:10px;margin-bottom:16px">
     <input id="pulioNewEmail" type="email" placeholder="상담사 이메일" autocomplete="off" required style="padding:10px;border:1px solid #ddd;border-radius:8px">
@@ -4745,14 +4745,26 @@ const accountAdmin = () => document.body.dataset.pulioRole === 'admin' && auth.c
 async function refreshAccounts(){
   if (!accountAdmin()) return;
   accountList.replaceChildren();
-  const result = await getDocs(collection(db,'counselors'));
-  for (const item of result.docs){
+  const [adminsResult, counselorsResult] = await Promise.all([
+    getDocs(collection(db,'admins')), getDocs(collection(db,'counselors'))
+  ]);
+  const accounts = [...adminsResult.docs.map(item => ({item, type:'admin'})), ...counselorsResult.docs.map(item => ({item, type:'counselor'}))];
+  accounts.sort((a,b) => (a.item.data().email||'').localeCompare(b.item.data().email||''));
+  for (const {item,type} of accounts){
     const data=item.data();
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-top:1px solid #eee;flex-wrap:wrap';
     const label=document.createElement('span');
-    label.textContent=(data.email||item.id)+' · '+(data.status==='active'?'승인':'접근 해지');
+    label.textContent=(data.email||item.id)+' · '+(type==='admin'?'관리자':'상담사')+' · '+(data.status==='active'?'승인':'접근 해지');
     label.style.cssText='font-size:13px;overflow-wrap:anywhere';
+    if(type==='admin'){
+      const badge=document.createElement('span');
+      badge.textContent='관리자';
+      badge.style.cssText='font-size:12px;color:#4b1d91;font-weight:700;padding:6px 10px;background:#f3edfb;border-radius:8px';
+      row.append(label,badge);
+      accountList.appendChild(row);
+      continue;
+    }
     const button=document.createElement('button');
     const enable=data.status!=='active';
     button.textContent=enable?'접근 승인':'접근 해지';
