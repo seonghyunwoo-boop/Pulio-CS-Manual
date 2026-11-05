@@ -4900,7 +4900,10 @@ onAuthStateChanged(auth, async (user) => {
       document.documentElement.classList.remove("pulio-auth-ready");
     document.body.classList.remove("pulio-authenticated");
     loginScreen.style.display = "flex";
-      await signOut(auth);
+      loginMessage.textContent = "접근 권한이 없는 계정입니다. 관리자에게 문의해 주세요.";
+      try { await signOut(auth); }
+      catch (logoutError) { console.error("Denied account sign-out error:", logoutError); }
+      loginMessage.textContent = "접근 권한이 없는 계정입니다. 관리자에게 문의해 주세요.";
       return;
     }
 
