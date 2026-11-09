@@ -358,6 +358,11 @@ body.detail-mode .header-actions .mobile-home-btn{display:inline-flex!important;
 .product-caution p{padding:0 14px 14px;margin:0;white-space:pre-line;line-height:1.65;font-size:13px;color:#5e5367}
 @media(max-width:640px){.product-category-summary{padding:18px}.product-category-fold .product-list{padding:14px 18px 18px}.product-category-nav{grid-template-columns:1fr 1fr}.product-category-nav button{padding:13px;font-size:13px}.product-spec-grid{grid-template-columns:1fr}}
 /* 제품 자료 다운로드 UI */
+
+/* MSDS 자료 다운로드 버튼 숨김 */
+.product-download-btn[href*="MSDS" i] {
+    display: none !important;
+}
 .product-download{margin-top:12px;padding:14px 16px;border:1px solid #e5dcef;border-radius:13px;background:#fbf9fd}
 .product-download-title{display:flex;align-items:center;gap:8px;margin-bottom:11px;color:#5c3978;font-size:13px;font-weight:800}
 .product-download-title i{width:28px;height:28px;border-radius:8px;background:#eee6f8;color:var(--pulio);display:grid;place-items:center;font-size:13px}
